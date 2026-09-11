@@ -1,0 +1,2586 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ECRA — V5</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:#03111b;
+ font-family:Arial,sans-serif;
+ touch-action:none;
+}
+
+canvas{
+ display:block;
+ width:100%;
+ height:100%;
+}
+
+#hud{
+ position:fixed;
+ z-index:10;
+ top:10px;
+ left:12px;
+ right:12px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ color:white;
+ font-weight:bold;
+ font-size:16px;
+ text-shadow:0 2px 5px #000;
+ pointer-events:none;
+}
+
+#bossHud{
+ position:fixed;
+ z-index:10;
+ top:48px;
+ left:50%;
+ transform:translateX(-50%);
+ width:min(420px,70%);
+ display:none;
+ text-align:center;
+ color:white;
+ font-weight:bold;
+ text-shadow:0 2px 4px #000;
+}
+
+#bossBar{
+ height:12px;
+ border:2px solid white;
+ border-radius:20px;
+ background:#250b17;
+ overflow:hidden;
+ box-shadow:0 0 15px #ff43b9;
+}
+
+#bossFill{
+ width:100%;
+ height:100%;
+ background:linear-gradient(90deg,#ff277f,#ff9a38);
+}
+
+#stage{
+ position:fixed;
+ z-index:10;
+ top:40px;
+ left:50%;
+ transform:translateX(-50%);
+ color:#bfffff;
+ font-weight:bold;
+ font-size:14px;
+ text-shadow:0 2px 5px #000;
+}
+
+.screen{
+ position:fixed;
+ z-index:50;
+ inset:0;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ color:white;
+ background:
+ radial-gradient(circle at center,#064b66dd,#02070cee 75%);
+ padding:25px;
+}
+
+.hide{display:none!important}
+
+.screen h1{
+ margin:0;
+ font-size:52px;
+ color:#fff;
+ text-shadow:
+ 0 0 10px #55ffff,
+ 0 0 30px #00aaff,
+ 0 0 60px #0077ff;
+}
+
+.screen h2{
+ color:#75ffff;
+ margin:8px;
+}
+
+.screen p{
+ max-width:700px;
+ line-height:1.5;
+}
+
+.screen button{
+ border:2px solid #9fffff;
+ border-radius:30px;
+ padding:14px 32px;
+ background:linear-gradient(135deg,#087b9a,#4b28a8);
+ color:white;
+ font-weight:bold;
+ font-size:18px;
+ box-shadow:0 0 25px #35eaff;
+}
+
+#touch{
+ position:fixed;
+ z-index:20;
+ bottom:12px;
+ left:0;
+ right:0;
+ display:flex;
+ justify-content:space-between;
+ padding:0 15px;
+ pointer-events:none;
+}
+
+.grp{
+ display:flex;
+ gap:10px;
+}
+
+.btn{
+ width:58px;
+ height:58px;
+ border-radius:50%;
+ border:2px solid #9fffff;
+ background:#07384dcc;
+ color:white;
+ font-size:24px;
+ box-shadow:
+ 0 0 15px #25eaff,
+ inset 0 0 15px #155e7d;
+ pointer-events:auto;
+}
+
+@media(min-width:800px){
+ .btn{
+  width:64px;
+  height:64px;
+ }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+ <span id="lives">❤️❤️❤️❤️❤️❤️❤️</span>
+ <span id="score">⭐ 0</span>
+</div>
+
+<div id="stage">NIVEL 1 · COSTA TURQUESA</div>
+
+<div id="bossHud">
+ <div>👑 REY DE LAS PROFUNDIDADES</div>
+ <div id="bossBar">
+  <div id="bossFill"></div>
+ </div>
+</div>
+
+<section id="menu" class="screen">
+ <h1>ECRA</h1>
+ <h2>WATER QUEST</h2>
+ <p>
+ Una aventura arcade por cinco mundos submarinos.
+ </p>
+ <p>
+ <b>← →</b> caminar ·
+ <b>↑ / ESPACIO</b> saltar ·
+ <b>X</b> disparar agua
+ </p>
+ <button onclick="startGame()">COMENZAR</button>
+</section>
+
+<section id="between" class="screen hide">
+ <h1 id="betweenTitle">NIVEL COMPLETADO</h1>
+ <p id="betweenText"></p>
+ <button onclick="nextLevel()">CONTINUAR</button>
+</section>
+
+<section id="gameover" class="screen hide">
+ <h1>GAME OVER</h1>
+ <p>ECRA se quedó sin vidas.</p>
+ <button onclick="location.reload()">REINTENTAR</button>
+</section>
+
+<section id="finish" class="screen hide">
+ <h1>🏆 VICTORIA</h1>
+ <h2>¡EL OCÉANO ESTÁ A SALVO!</h2>
+ <p id="finalScore"></p>
+ <button onclick="location.reload()">JUGAR OTRA VEZ</button>
+</section>
+
+<div id="touch">
+
+ <div class="grp">
+  <button class="btn" id="left">◀️</button>
+  <button class="btn" id="right">▶️</button>
+ </div>
+
+ <div class="grp">
+  <button class="btn" id="jump">⬆️</button>
+  <button class="btn" id="fire">💧</button>
+ </div>
+
+</div>
+
+<script>
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let W=innerWidth;
+let H=innerHeight;
+let DPR=devicePixelRatio||1;
+
+function resize(){
+
+ W=innerWidth;
+ H=innerHeight;
+
+ canvas.width=W*DPR;
+ canvas.height=H*DPR;
+
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+
+addEventListener("resize",resize);
+resize();
+
+
+/* =========================
+   IMÁGENES DE ECRA
+========================= */
+
+const imgIdle=new Image();
+const imgWalk1=new Image();
+const imgWalk2=new Image();
+const imgWalk3=new Image();
+const imgWalk4=new Image();
+
+imgIdle.src="ecra_idle.png";
+imgWalk1.src="ecra_walk1.png";
+imgWalk2.src="ecra_walk2.png";
+imgWalk3.src="ecra_walk3.png";
+imgWalk4.src="ecra_walk4.png";
+
+const walkImages=[
+ imgWalk1,
+ imgWalk2,
+ imgWalk3,
+ imgWalk4
+];
+
+
+/* =========================
+   TECLADO
+========================= */
+
+const keys={};
+
+addEventListener("keydown",e=>{
+
+ keys[e.key.toLowerCase()]=true;
+
+ if(e.key===" " || e.key==="ArrowUp"){
+  e.preventDefault();
+  jump();
+ }
+
+ if(e.key.toLowerCase()==="x"){
+  fireWater();
+ }
+
+});
+
+addEventListener("keyup",e=>{
+ keys[e.key.toLowerCase()]=false;
+});
+
+
+/* =========================
+   BOTONES CELULAR
+========================= */
+
+function holdButton(id,key){
+
+ const b=document.getElementById(id);
+
+ b.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  keys[key]=true;
+ });
+
+ b.addEventListener("pointerup",e=>{
+  e.preventDefault();
+  keys[key]=false;
+ });
+
+ b.addEventListener("pointercancel",()=>{
+  keys[key]=false;
+ });
+
+ b.addEventListener("pointerleave",()=>{
+  keys[key]=false;
+ });
+}
+
+holdButton("left","arrowleft");
+holdButton("right","arrowright");
+
+document.getElementById("jump")
+.addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ jump();
+});
+
+document.getElementById("fire")
+.addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ fireWater();
+});
+
+
+/* =========================
+   ESTADO DEL JUEGO
+========================= */
+
+let mode="menu";
+
+let levelNumber=1;
+
+let score=0;
+
+let lives=7;
+
+let cameraX=0;
+
+let worldWidth=6000;
+
+let lastTime=0;
+
+let platforms=[];
+
+let enemies=[];
+
+let waterShots=[];
+
+let bubbles=[];
+
+let particles=[];
+
+let decorations=[];
+
+let boss=null;
+
+let portal=null;
+
+let respawnTimer=0;
+
+let levelChanging=false;
+
+
+/* =========================
+   ECRA
+========================= */
+
+const player={
+
+ x:120,
+ y:100,
+
+ w:54,
+ h:76,
+
+ vx:0,
+ vy:0,
+
+ speed:370,
+
+ jumpPower:720,
+
+ grounded:false,
+
+ face:1,
+
+ invincible:0,
+
+ walkTime:0,
+
+ shotCooldown:0
+
+};
+
+
+/* =========================
+   COMENZAR
+========================= */
+
+function startGame(){
+
+ document.getElementById("menu").classList.add("hide");
+
+ mode="play";
+
+ createLevel(1);
+}
+
+
+/* =========================
+   CREAR NIVEL
+========================= */
+
+function createLevel(n){
+
+ levelNumber=n;
+
+ platforms=[];
+ enemies=[];
+ waterShots=[];
+ bubbles=[];
+ particles=[];
+ decorations=[];
+
+ boss=null;
+
+ portal=null;
+
+ worldWidth=5800+n*300;
+
+ player.x=120;
+ player.y=H-150;
+
+ player.vx=0;
+ player.vy=0;
+
+ player.invincible=0;
+
+ levelChanging=false;
+
+ if(n===1) createBeach();
+ if(n===2) createCoral();
+ if(n===3) createCaves();
+ if(n===4) createTemple();
+ if(n===5) createVolcano();
+
+ updateStage();
+
+}
+
+
+/* =========================
+   PLATAFORMAS
+========================= */
+
+function addPlatform(x,y,w,h=22){
+
+ platforms.push({
+  x:x,
+  y:y,
+  w:w,
+  h:h
+ });
+
+}
+
+
+/* =========================
+   NIVELES
+========================= */
+
+function createBeach(){
+
+ for(let i=0;i<14;i++){
+
+  let xx=280+i*390;
+
+  let yy=H-150-(i%3)*80;
+
+  addPlatform(xx,yy,270);
+
+  decorations.push({
+   x:xx,
+   type:"palm"
+  });
+
+ }
+
+ spawnEnemies();
+
+ portal={
+  x:worldWidth-170,
+  y:H-150
+ };
+
+}
+
+
+function createCoral(){
+
+ for(let i=0;i<15;i++){
+
+  let xx=260+i*380;
+
+  let yy=H-170-(i%4)*70;
+
+  addPlatform(xx,yy,250);
+
+  decorations.push({
+   x:xx,
+   type:"coral"
+  });
+
+ }
+
+ spawnEnemies();
+
+ portal={
+  x:worldWidth-170,
+  y:H-150
+ };
+
+}
+
+
+function createCaves(){
+
+ for(let i=0;i<16;i++){
+
+  let xx=230+i*360;
+
+  let yy=H-140-(i%5)*75;
+
+  addPlatform(xx,yy,240);
+
+  decorations.push({
+   x:xx,
+   type:"rock"
+  });
+
+ }
+
+ spawnEnemies();
+
+ portal={
+  x:worldWidth-170,
+  y:H-150
+ };
+
+}
+
+
+function createTemple(){
+
+ for(let i=0;i<15;i++){
+
+  let xx=270+i*390;
+
+  let yy=H-180-(i%3)*100;
+
+  addPlatform(xx,yy,270);
+
+  decorations.push({
+   x:xx,
+   type:"temple"
+  });
+
+ }
+
+ spawnEnemies();
+
+ portal={
+  x:worldWidth-170,
+  y:H-150
+ };
+
+}
+
+
+function createVolcano(){
+
+ for(let i=0;i<17;i++){
+
+  let xx=230+i*350;
+
+  let yy=H-150-(i%4)*75;
+
+  addPlatform(xx,yy,230);
+
+  decorations.push({
+   x:xx,
+   type:"volcano"
+  });
+
+ }
+
+ spawnEnemies();
+
+}
+
+
+/* =========================
+   ENEMIGOS
+========================= */
+
+function spawnEnemies(){
+
+ for(let i=0;i<13;i++){
+
+  let platform=
+   platforms[1+(i%Math.max(1,platforms.length-1))];
+
+  if(!platform)continue;
+
+  let type=i%3;
+
+  enemies.push({
+
+   x:platform.x+40,
+
+   y:platform.y-55,
+
+   w:55,
+
+   h:55,
+
+   platform:platform,
+
+   vx:(i%2?90:-90),
+
+   hp:type===1?3:2,
+
+   maxHp:type===1?3:2,
+
+   type:type,
+
+   alive:true,
+
+   anim:Math.random()*10
+
+  });
+
+ }
+
+}
+
+
+/* =========================
+   SALTO
+========================= */
+
+function jump(){
+
+ if(mode!=="play")return;
+
+ if(player.grounded){
+
+  player.vy=-player.jumpPower;
+
+  player.grounded=false;
+
+  createBurst(
+   player.x+player.w/2,
+   player.y+player.h,
+   12,
+   "#75ffff"
+  );
+
+ }
+
+}
+
+
+/* =========================
+   DISPARO DE AGUA
+========================= */
+
+function fireWater(){
+
+ if(mode!=="play")return;
+
+ if(player.shotCooldown>0)return;
+
+ player.shotCooldown=.22;
+
+ waterShots.push({
+
+  x:player.x+(player.face>0?player.w:0),
+
+  y:player.y+35,
+
+  vx:player.face*760,
+
+  r:11,
+
+  life:2,
+
+  power:1
+
+ });
+
+ createBurst(
+  player.x+player.w/2,
+  player.y+30,
+  8,
+  "#5fffff"
+ );
+
+}
+
+
+/* =========================
+   ACTUALIZACIÓN
+========================= */
+
+function update(dt){
+
+ if(mode!=="play"){
+
+  updateParticles(dt);
+
+  return;
+
+ }
+
+
+ /* MOVIMIENTO */
+
+ let left=
+  keys.arrowleft||
+  keys.a;
+
+ let right=
+  keys.arrowright||
+  keys.d;
+
+
+ if(left){
+
+  player.vx=-player.speed;
+
+  player.face=-1;
+
+ }
+
+ else if(right){
+
+  player.vx=player.speed;
+
+  player.face=1;
+
+ }
+
+ else{
+
+  player.vx*=Math.pow(.001,dt);
+
+ }
+
+
+ player.x+=player.vx*dt;
+
+
+ /* GRAVEDAD */
+
+ player.vy+=1800*dt;
+
+ let oldY=player.y;
+
+ player.y+=player.vy*dt;
+
+ player.grounded=false;
+
+
+ /* PLATAFORMAS */
+
+ for(let p of platforms){
+
+  if(
+
+   player.x+player.w>p.x&&
+
+   player.x<p.x+p.w&&
+
+   oldY+player.h<=p.y&&
+
+   player.y+player.h>=p.y&&
+
+   player.vy>=0
+
+  ){
+
+   player.y=p.y-player.h;
+
+   player.vy=0;
+
+   player.grounded=true;
+
+  }
+
+ }
+
+
+ /* SUELO */
+
+ const floorY=H-60;
+
+ if(player.y+player.h>=floorY){
+
+  player.y=floorY-player.h;
+
+  player.vy=0;
+
+  player.grounded=true;
+
+ }
+
+
+ /* LIMITES */
+
+ if(player.x<0)player.x=0;
+
+ if(player.x>worldWidth-player.w){
+
+  player.x=worldWidth-player.w;
+
+ }
+
+
+ /* CAÍDA */
+
+ if(player.y>H+250){
+
+  playerHit();
+
+ }
+
+
+ /* ANIMACIÓN */
+
+ if(Math.abs(player.vx)>30 && player.grounded){
+
+  player.walkTime+=dt*9;
+
+ }
+
+ else{
+
+  player.walkTime+=dt*2;
+
+ }
+
+
+ player.shotCooldown=
+ Math.max(0,player.shotCooldown-dt);
+
+ player.invincible=
+ Math.max(0,player.invincible-dt);
+
+
+ updateWater(dt);
+
+ updateEnemies(dt);
+
+ updateBoss(dt);
+
+ updateParticles(dt);
+
+
+ /* CÁMARA */
+
+ cameraX=Math.max(
+  0,
+  Math.min(
+   worldWidth-W,
+   player.x-W*.38
+  )
+ );
+
+
+ /* PORTAL */
+
+ if(
+
+  portal&&
+
+  enemies.filter(e=>e.alive).length===0&&
+
+  player.x>portal.x-100&&
+
+  levelNumber<5
+
+ ){
+
+  completeLevel();
+
+ }
+
+
+ /* JEFE FINAL */
+
+ if(
+
+  levelNumber===5&&
+
+  enemies.filter(e=>e.alive).length===0&&
+
+  !boss
+
+ ){
+
+  createBoss();
+
+ }
+
+}
+
+
+/* =========================
+   AGUA
+========================= */
+
+function updateWater(dt){
+
+ for(let i=waterShots.length-1;i>=0;i--){
+
+  let s=waterShots[i];
+
+  s.x+=s.vx*dt;
+
+  s.life-=dt;
+
+  let remove=s.life<=0;
+
+
+  for(let e of enemies){
+
+   if(!e.alive)continue;
+
+   if(circleRect(s.x,s.y,s.r,e)){
+
+    e.hp-=s.power;
+
+    createBurst(
+     e.x+e.w/2,
+     e.y+e.h/2,
+     16,
+     "#7fffff"
+    );
+
+    if(e.hp<=0){
+
+     e.alive=false;
+
+     score+=300;
+
+     createBurst(
+      e.x+e.w/2,
+      e.y+e.h/2,
+      35,
+      "#ffffff"
+     );
+
+    }
+
+    remove=true;
+
+    break;
+
+   }
+
+  }
+
+
+  if(boss&&boss.active){
+
+   if(circleRect(s.x,s.y,s.r,boss)){
+
+    boss.hp-=s.power;
+
+    score+=50;
+
+    createBurst(
+     boss.x+boss.w/2,
+     boss.y+boss.h/2,
+     20,
+     "#8fffff"
+    );
+
+    remove=true;
+
+    if(boss.hp<=0){
+
+     boss.active=false;
+
+     score+=10000;
+
+     mode="finish";
+
+     document.getElementById("bossHud")
+     .style.display="none";
+
+     document.getElementById("finalScore")
+     .textContent=
+     "Puntaje final: "+score+" ⭐";
+
+     document.getElementById("finish")
+     .classList.remove("hide");
+
+     createBurst(
+      boss.x+boss.w/2,
+      boss.y+boss.h/2,
+      150,
+      "#ffffff"
+     );
+
+    }
+
+   }
+
+  }
+
+
+  if(remove){
+
+   waterShots.splice(i,1);
+
+  }
+
+ }
+
+}
+
+
+/* =========================
+   ENEMIGOS
+========================= */
+
+function updateEnemies(dt){
+
+ for(let e of enemies){
+
+  if(!e.alive)continue;
+
+
+  e.anim+=dt*6;
+
+  e.x+=e.vx*dt;
+
+
+  if(
+
+   e.x<e.platform.x||
+
+   e.x+e.w>e.platform.x+e.platform.w
+
+  ){
+
+   e.vx*=-1;
+
+  }
+
+
+  e.y=e.platform.y-e.h;
+
+
+  /* CONTACTO */
+
+  if(
+
+   player.invincible<=0&&
+
+   hitbox(player,e)
+
+  ){
+
+   playerHit();
+
+  }
+
+ }
+
+}
+
+
+/* =========================
+   GOLPE A ECRA
+========================= */
+
+function playerHit(){
+
+ if(player.invincible>0)return;
+
+ lives--;
+
+ player.invincible=2.2;
+
+ respawnTimer=.7;
+
+ createBurst(
+  player.x+player.w/2,
+  player.y+player.h/2,
+  40,
+  "#ff5577"
+ );
+
+ updateHUD();
+
+
+ if(lives<=0){
+
+  mode="gameover";
+
+  document.getElementById("gameover")
+  .classList.remove("hide");
+
+  return;
+
+ }
+
+
+ /* RESPWAN */
+
+ setTimeout(()=>{
+
+  if(mode!=="play")return;
+
+  player.x=
+   Math.max(
+    100,
+    player.x-350
+   );
+
+  player.y=120;
+
+  player.vx=0;
+
+  player.vy=0;
+
+ },700);
+
+}
+
+
+/* =========================
+   JEFE
+========================= */
+
+function createBoss(){
+
+ boss={
+
+  x:worldWidth-700,
+
+  y:H-300,
+
+  w:190,
+
+  h:190,
+
+  hp:45,
+
+  maxHp:45,
+
+  vx:130,
+
+  vy:0,
+
+  active:true,
+
+  anim:0,
+
+  attackTimer:2,
+
+  tentacles:[]
+
+ };
+
+
+ for(let i=0;i<6;i++){
+
+  boss.tentacles.push({
+
+   angle:i*Math.PI/3,
+
+   length:100+Math.random()*50,
+
+   speed:1+Math.random()*1.5
+
+  });
+
+ }
+
+
+ document.getElementById("bossHud")
+ .style.display="block";
+
+}
+
+
+/* =========================
+   MOVIMIENTO DEL JEFE
+========================= */
+
+function updateBoss(dt){
+
+ if(!boss||!boss.active)return;
+
+
+ boss.anim+=dt;
+
+ boss.x+=boss.vx*dt;
+
+
+ if(
+
+  boss.x<worldWidth-1050||
+
+  boss.x>worldWidth-250
+
+ ){
+
+  boss.vx*=-1;
+
+ }
+
+
+ /* MOVIMIENTO VERTICAL */
+
+ boss.y=
+ H-300+
+ Math.sin(boss.anim*1.7)*45;
+
+
+ /* TENTÁCULOS */
+
+ for(let i=0;i<boss.tentacles.length;i++){
+
+  boss.tentacles[i].angle+=
+   dt*boss.tentacles[i].speed;
+
+ }
+
+
+ /* ATAQUE */
+
+ boss.attackTimer-=dt;
+
+ if(boss.attackTimer<=0){
+
+  boss.attackTimer=2.4;
+
+  createBossAttack();
+
+ }
+
+
+ /* CONTACTO */
+
+ if(
+
+  player.invincible<=0&&
+
+  hitbox(player,boss)
+
+ ){
+
+  playerHit();
+
+ }
+
+
+ /* TENTÁCULOS */
+
+ for(let t of boss.tentacles){
+
+  let tx=
+   boss.x+boss.w/2+
+   Math.cos(t.angle)*t.length;
+
+  let ty=
+   boss.y+boss.h/2+
+   Math.sin(t.angle)*t.length;
+
+  let dx=player.x+player.w/2-tx;
+
+  let dy=player.y+player.h/2-ty;
+
+  let dist=Math.sqrt(dx*dx+dy*dy);
+
+
+  if(dist<45&&player.invincible<=0){
+
+   /* MEDIA VIDA */
+
+   playerHit();
+
+  }
+
+ }
+
+
+ if(boss.active){
+
+  document.getElementById("bossFill")
+  .style.width=
+  Math.max(0,boss.hp/boss.maxHp*100)+"%";
+
+ }
+
+}
+
+
+/* =========================
+   ATAQUE DEL JEFE
+========================= */
+
+function createBossAttack(){
+
+ let angle=
+ Math.atan2(
+  player.y-boss.y,
+  player.x-boss.x
+ );
+
+
+ waterShots.push({
+
+  x:boss.x+boss.w/2,
+
+  y:boss.y+boss.h/2,
+
+  vx:Math.cos(angle)*420,
+
+  vy:Math.sin(angle)*420,
+
+  r:18,
+
+  life:3,
+
+  power:0,
+
+  enemy:true
+
+ });
+
+}
+
+
+/* =========================
+   PARTÍCULAS
+========================= */
+
+function createBurst(x,y,n,color){
+
+ for(let i=0;i<n;i++){
+
+  particles.push({
+
+   x:x,
+
+   y:y,
+
+   vx:(Math.random()-.5)*600,
+
+   vy:(Math.random()-.5)*600,
+
+   life:.5+Math.random(),
+
+   size:2+Math.random()*6,
+
+   color:color
+
+  });
+
+ }
+
+}
+
+
+function updateParticles(dt){
+
+ for(let i=particles.length-1;i>=0;i--){
+
+  let p=particles[i];
+
+  p.x+=p.vx*dt;
+
+  p.y+=p.vy*dt;
+
+  p.vy+=500*dt;
+
+  p.life-=dt;
+
+  if(p.life<=0){
+
+   particles.splice(i,1);
+
+  }
+
+ }
+
+}
+
+
+/* =========================
+   DIBUJO
+========================= */
+
+function draw(){
+
+ drawBackground();
+
+ ctx.save();
+
+ ctx.translate(-cameraX,0);
+
+ drawDecorations();
+
+ drawPlatforms();
+
+ drawEnemies();
+
+ drawBoss();
+
+ drawPortal();
+
+ drawWater();
+
+ drawPlayer();
+
+ drawParticles();
+
+ ctx.restore();
+
+}
+
+
+/* =========================
+   FONDOS
+========================= */
+
+function drawBackground(){
+
+ let g=ctx.createLinearGradient(
+  0,0,0,H
+ );
+
+
+ if(levelNumber===1){
+
+  g.addColorStop(0,"#009fc4");
+  g.addColorStop(.55,"#056d94");
+  g.addColorStop(1,"#022a43");
+
+ }
+
+
+ if(levelNumber===2){
+
+  g.addColorStop(0,"#006b76");
+  g.addColorStop(.5,"#034e63");
+  g.addColorStop(1,"#011d35");
+
+ }
+
+
+ if(levelNumber===3){
+
+  g.addColorStop(0,"#152d52");
+  g.addColorStop(.5,"#071b35");
+  g.addColorStop(1,"#020814");
+
+ }
+
+
+ if(levelNumber===4){
+
+  g.addColorStop(0,"#4c2d6e");
+  g.addColorStop(.5,"#1c2352");
+  g.addColorStop(1,"#080d27");
+
+ }
+
+
+ if(levelNumber===5){
+
+  g.addColorStop(0,"#552036");
+  g.addColorStop(.5,"#21152f");
+  g.addColorStop(1,"#080817");
+
+ }
+
+
+ ctx.fillStyle=g;
+
+ ctx.fillRect(0,0,W,H);
+
+
+ /* BURBUJAS DE FONDO */
+
+ for(let i=0;i<50;i++){
+
+  let xx=
+   ((i*181-cameraX*.12)%
+   Math.max(worldWidth,W)+
+   Math.max(worldWidth,W))
+   %
+   Math.max(worldWidth,W);
+
+  let yy=
+   (i*73)%Math.max(150,H);
+
+  ctx.globalAlpha=.18;
+
+  ctx.strokeStyle="#ffffff";
+
+  ctx.beginPath();
+
+  ctx.arc(
+   xx,
+   yy,
+   3+(i%5),
+   0,
+   Math.PI*2
+  );
+
+  ctx.stroke();
+
+ }
+
+ ctx.globalAlpha=1;
+
+
+ /* LUZ */
+
+ let glow=ctx.createRadialGradient(
+  W*.5,
+  H*.2,
+ 20,
+  W*.5,
+  H*.2,
+  H*.8
+ );
+
+ glow.addColorStop(0,"#7fffff22");
+ glow.addColorStop(1,"transparent");
+
+ ctx.fillStyle=glow;
+
+ ctx.fillRect(0,0,W,H);
+
+}
+
+
+/* =========================
+   DECORACIÓN
+========================= */
+
+function drawDecorations(){
+
+ for(let d of decorations){
+
+  let x=d.x;
+
+  if(d.type==="palm"){
+
+   ctx.fillStyle="#754529";
+
+   ctx.fillRect(
+    x,
+    H-290,
+    20,
+    230
+   );
+
+   ctx.fillStyle="#19c879";
+
+   for(let i=0;i<5;i++){
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+     x+10,
+     H-295,
+     70,
+     18,
+     i*Math.PI/2.5,
+     0,
+     Math.PI*2
+    );
+
+    ctx.fill();
+
+   }
+
+  }
+
+
+  if(d.type==="coral"){
+
+   ctx.strokeStyle="#ff69c9";
+
+   ctx.lineWidth=14;
+
+   ctx.beginPath();
+
+   ctx.moveTo(x,H-60);
+
+   ctx.lineTo(x+15,H-190);
+
+   ctx.lineTo(x-25,H-245);
+
+   ctx.moveTo(x+15,H-190);
+
+   ctx.lineTo(x+55,H-245);
+
+   ctx.stroke();
+
+  }
+
+
+  if(d.type==="rock"){
+
+   ctx.fillStyle="#263b5d";
+
+   ctx.beginPath();
+
+   ctx.moveTo(x,H-60);
+
+   ctx.lineTo(x+40,H-230);
+
+   ctx.lineTo(x+120,H-280);
+
+   ctx.lineTo(x+180,H-60);
+
+   ctx.closePath();
+
+   ctx.fill();
+
+  }
+
+
+  if(d.type==="temple"){
+
+   ctx.fillStyle="#6e638c";
+
+   ctx.fillRect(
+    x,
+    H-300,
+    100,
+    240
+   );
+
+   ctx.fillStyle="#3f375f";
+
+   ctx.beginPath();
+
+   ctx.moveTo(x-20,H-300);
+
+   ctx.lineTo(x+50,H-370);
+
+   ctx.lineTo(x+120,H-300);
+
+   ctx.closePath();
+
+   ctx.fill();
+
+  }
+
+
+  if(d.type==="volcano"){
+
+   ctx.fillStyle="#3c2230";
+
+   ctx.beginPath();
+
+   ctx.moveTo(x,H-60);
+
+   ctx.lineTo(x+100,H-320);
+
+   ctx.lineTo(x+210,H-60);
+
+   ctx.closePath();
+
+   ctx.fill();
+
+   ctx.fillStyle="#ff593d";
+
+   ctx.beginPath();
+
+   ctx.moveTo(x+75,H-245);
+
+   ctx.lineTo(x+100,H-320);
+
+   ctx.lineTo(x+125,H-245);
+
+   ctx.closePath();
+
+   ctx.fill();
+
+  }
+
+ }
+
+}
+
+
+/* =========================
+   PLATAFORMAS
+========================= */
+
+function drawPlatforms(){
+
+ for(let p of platforms){
+
+  let g=ctx.createLinearGradient(
+   0,
+   p.y,
+   0,
+   p.y+p.h
+  );
+
+  if(levelNumber===1){
+
+   g.addColorStop(0,"#f3d08b");
+   g.addColorStop(1,"#88502d");
+
+  }
+
+  else if(levelNumber===2){
+
+   g.addColorStop(0,"#42e0bd");
+   g.addColorStop(1,"#176c70");
+
+  }
+
+  else if(levelNumber===3){
+
+   g.addColorStop(0,"#687da1");
+   g.addColorStop(1,"#28364f");
+
+  }
+
+  else if(levelNumber===4){
+
+   g.addColorStop(0,"#c3a5e9");
+   g.addColorStop(1,"#554178");
+
+  }
+
+  else{
+
+   g.addColorStop(0,"#ff925c");
+   g.addColorStop(1,"#68283a");
+
+  }
+
+  ctx.fillStyle=g;
+
+  ctx.fillRect(
+   p.x,
+   p.y,
+   p.w,
+   p.h
+  );
+
+  ctx.fillStyle="#ffffff55";
+
+  ctx.fillRect(
+   p.x,
+   p.y,
+   p.w,
+   4
+  );
+
+ }
+
+
+ /* SUELO */
+
+ let floorGrad=ctx.createLinearGradient(
+  0,
+  H-60,
+  0,
+  H
+ );
+
+ floorGrad.addColorStop(0,"#126c86");
+ floorGrad.addColorStop(1,"#031824");
+
+ ctx.fillStyle=floorGrad;
+
+ ctx.fillRect(
+  0,
+  H-60,
+  worldWidth,
+  60
+ );
+
+}
+
+
+/* =========================
+   ECRA
+========================= */
+
+function drawPlayer(){
+
+ if(player.invincible>0&&
+    Math.floor(player.invincible*12)%2===0){
+
+  return;
+
+ }
+
+
+ let image=imgIdle;
+
+ if(Math.abs(player.vx)>40&&
+    player.grounded){
+
+  let frame=
+   Math.floor(player.walkTime)%walkImages.length;
+
+  image=walkImages[frame];
+
+ }
+
+
+ ctx.save();
+
+ ctx.translate(
+  player.x+player.w/2,
+  player.y+player.h/2
+ );
+
+ ctx.scale(
+  player.face,
+  1
+ );
+
+
+ /* GLOW */
+
+ let glow=ctx.createRadialGradient(
+  0,
+  0,
+  5,
+  0,
+  0,
+  65
+ );
+
+ glow.addColorStop(0,"#ffffff55");
+ glow.addColorStop(1,"transparent");
+
+ ctx.fillStyle=glow;
+
+ ctx.beginPath();
+
+ ctx.arc(
+  0,
+  0,
+  65,
+  0,
+  Math.PI*2
+ );
+
+ ctx.fill();
+
+
+ /* IMAGEN */
+
+ if(image.complete){
+
+  ctx.drawImage(
+   image,
+   -player.w/2,
+   -player.h/2,
+   player.w,
+   player.h
+  );
+
+ }
+
+ ctx.restore();
+
+}
+
+
+/* =========================
+   ENEMIGOS
+========================= */
+
+function drawEnemies(){
+
+ for(let e of enemies){
+
+  if(!e.alive)continue;
+
+  ctx.save();
+
+  let cx=e.x+e.w/2;
+  let cy=e.y+e.h/2;
+
+  ctx.translate(cx,cy);
+
+  if(e.type===0){
+
+   /* PULPO */
+
+   ctx.fillStyle="#b63eea";
+
+   ctx.shadowBlur=18;
+   ctx.shadowColor="#ff53e8";
+
+   ctx.beginPath();
+
+   ctx.arc(
+    0,
+    -5,
+    25,
+    0,
+    Math.PI*2
+   );
+
+   ctx.fill();
+
+   ctx.shadowBlur=0;
+
+   /* BRAZOS */
+
+   ctx.strokeStyle="#e77cff";
+
+   ctx.lineWidth=8;
+
+   for(let i=0;i<6;i++){
+
+    let a=
+     i*Math.PI/3+
+     Math.sin(e.anim+i)*.3;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+     Math.cos(a)*12,
+     Math.sin(a)*12
+    );
+
+    ctx.quadraticCurveTo(
+     Math.cos(a)*35,
+     Math.sin(a)*35+Math.sin(e.anim+i)*8,
+     Math.cos(a)*48,
+     Math.sin(a)*48
+    );
+
+    ctx.stroke();
+
+   }
+
+   ctx.fillStyle="white";
+
+   ctx.beginPath();
+
+   ctx.arc(-8,-8,5,0,7);
+
+   ctx.arc(8,-8,5,0,7);
+
+   ctx.fill();
+
+  }
+
+
+  if(e.type===1){
+
+   /* CANGREJO */
+
+   ctx.fillStyle="#ff6548";
+
+   ctx.beginPath();
+
+   ctx.ellipse(
+    0,
+    0,
+    28,
+    20,
+    0,
+    0,
+    Math.PI*2
+   );
+
+   ctx.fill();
+
+   ctx.strokeStyle="#ff9c72";
+
+   ctx.lineWidth=6;
+
+   for(let i=0;i<4;i++){
+
+    let side=i%2?-1:1;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+     side*18,
+     -8+i*5
+    );
+
+    ctx.lineTo(
+     side*(38+i*5),
+     -18+i*10
+    );
+
+    ctx.stroke();
+
+   }
+
+   ctx.fillStyle="white";
+
+   ctx.beginPath();
+
+   ctx.arc(-9,-10,4,0,7);
+
+   ctx.arc(9,-10,4,0,7);
+
+   ctx.fill();
+
+  }
+
+
+  if(e.type===2){
+
+   /* MEDUSA */
+
+   ctx.fillStyle="#49d9ff";
+
+   ctx.shadowBlur=20;
+
+   ctx.shadowColor="#42ffff";
+
+   ctx.beginPath();
+
+   ctx.arc(
+    0,
+    -5,
+    25,
+    Math.PI,
+    0
+   );
+
+   ctx.lineTo(25,20);
+
+   ctx.lineTo(-25,20);
+
+   ctx.closePath();
+
+   ctx.fill();
+
+   ctx.shadowBlur=0;
+
+   ctx.strokeStyle="#80ffff";
+
+   ctx.lineWidth=6;
+
+   for(let i=-2;i<=2;i++){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+     i*10,
+     15
+    );
+
+    ctx.quadraticCurveTo(
+     i*12,
+     40+Math.sin(e.anim+i)*8,
+     i*10,
+     55
+    );
+
+    ctx.stroke();
+
+   }
+
+  }
+
+  ctx.restore();
+
+
+  /* VIDA */
+
+  ctx.fillStyle="#07111a";
+
+  ctx.fillRect(
+   e.x,
+   e.y-12,
+   e.w,
+   5
+  );
+
+  ctx.fillStyle="#63ffff";
+
+  ctx.fillRect(
+   e.x,
+   e.y-12,
+   e.w*(e.hp/e.maxHp),
+   5
+  );
+
+ }
+
+}
+
+
+/* =========================
+   JEFE MARINO
+========================= */
+
+function drawBoss(){
+
+ if(!boss||!boss.active)return;
+
+ ctx.save();
+
+ let cx=boss.x+boss.w/2;
+ let cy=boss.y+boss.h/2;
+
+ ctx.translate(cx,cy);
+
+
+ /* CUERPO */
+
+ ctx.shadowBlur=35;
+
+ ctx.shadowColor="#ff43d0";
+
+ ctx.fillStyle="#35105b";
+
+ ctx.strokeStyle="#ff69e7";
+
+ ctx.lineWidth=7;
+
+ ctx.beginPath();
+
+ ctx.arc(
+  0,
+  0,
+  85,
+  0,
+  Math.PI*2
+ );
+
+ ctx.fill();
+
+ ctx.stroke();
+
+ ctx.shadowBlur=0;
+
+
+ /* OJOS */
+
+ ctx.fillStyle="white";
+
+ ctx.beginPath();
+
+ ctx.arc(
+  -28,
+  -20,
+  13,
+  0,
+  Math.PI*2
+ );
+
+ ctx.arc(
+  28,
+  -20,
+  13,
+  0,
+  Math.PI*2
+ );
+
+ ctx.fill();
+
+
+ ctx.fillStyle="#16102d";
+
+ ctx.beginPath();
+
+ ctx.arc(
+  -28,
+  -20,
+  5,
+  0,
+  Math.PI*2
+ );
+
+ ctx.arc(
+  28,
+  -20,
+  5,
+  0,
+  Math.PI*2
+ );
+
+ ctx.fill();
+
+
+ /* TENTÁCULOS */
+
+ for(let t of boss.tentacles){
+
+  let a=t.angle;
+
+  let x1=Math.cos(a)*55;
+  let y1=Math.sin(a)*55;
+
+  let x2=Math.cos(a)*t.length;
+  let y2=Math.sin(a)*t.length;
+
+  ctx.strokeStyle="#b94cff";
+
+  ctx.lineWidth=18;
+
+  ctx.beginPath();
+
+  ctx.moveTo(x1,y1);
+
+  ctx.quadraticCurveTo(
+   x2*.6,
+   y2*.6+
+   Math.sin(boss.anim*3+a)*25,
+   x2,
+   y2
+  );
+
+  ctx.stroke();
+
+  ctx.strokeStyle="#ec75ff";
+
+  ctx.lineWidth=6;
+
+  ctx.stroke();
+
+ }
+
+
+ ctx.restore();
+
+}
+
+
+/* =========================
+   PORTAL
+========================= */
+
+function drawPortal(){
+
+ if(!portal)return;
+
+ if(
+  enemies.some(e=>e.alive)
+ )return;
+
+ ctx.save();
+
+ ctx.translate(
+  portal.x,
+  portal.y
+ );
+
+ ctx.shadowBlur=35;
+
+ ctx.shadowColor="#7fffff";
+
+ ctx.strokeStyle="#ffffff";
+
+ ctx.lineWidth=7;
+
+ ctx.beginPath();
+
+ ctx.ellipse(
+  0,
+  0,
+  35,
+  60,
+  0,
+  0,
+  Math.PI*2
+ );
+
+ ctx.stroke();
+
+ ctx.shadowBlur=0;
+
+ ctx.fillStyle="#ffffff";
+
+ ctx.font="bold 14px Arial";
+
+ ctx.textAlign="center";
+
+ ctx.fillText(
+  "SIGUIENTE",
+  0,
+  -75
+ );
+
+ ctx.restore();
+
+}
+
+
+/* =========================
+   AGUA
+========================= */
+
+function drawWater(){
+
+ for(let s of waterShots){
+
+  ctx.save();
+
+  ctx.shadowBlur=20;
+
+  ctx.shadowColor="#5fffff";
+
+  let g=ctx.createRadialGradient(
+   s.x,
+   s.y,
+   1,
+   s.x,
+   s.y,
+   s.r
+  );
+
+  g.addColorStop(0,"white");
+  g.addColorStop(.35,"#8fffff");
+  g.addColorStop(1,"#159dff");
+
+  ctx.fillStyle=g;
+
+  ctx.beginPath();
+
+  ctx.arc(
+   s.x,
+   s.y,
+   s.r,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.restore();
+
+ }
+
+}
+
+
+/* =========================
+   PARTÍCULAS
+========================= */
+
+function drawParticles(){
+
+ for(let p of particles){
+
+  ctx.globalAlpha=
+   Math.max(0,p.life);
+
+  ctx.fillStyle=p.color;
+
+  ctx.beginPath();
+
+  ctx.arc(
+   p.x,
+   p.y,
+   p.size,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+
+ }
+
+ ctx.globalAlpha=1;
+
+}
+
+
+/* =========================
+   COLISIONES
+========================= */
+
+function hitbox(a,b){
+
+ return(
+
+  a.x<b.x+b.w&&
+
+  a.x+a.w>b.x&&
+
+  a.y<b.y+b.h&&
+
+  a.y+a.h>b.y
+
+ );
+
+}
+
+
+function circleRect(cx,cy,r,b){
+
+ let xx=
+  Math.max(
+   b.x,
+   Math.min(cx,b.x+b.w)
+  );
+
+ let yy=
+  Math.max(
+   b.y,
+   Math.min(cy,b.y+b.h)
+  );
+
+ let dx=cx-xx;
+
+ let dy=cy-yy;
+
+ return dx*dx+dy*dy<r*r;
+
+}
+
+
+/* =========================
+   CAMBIO DE NIVEL
+========================= */
+
+function completeLevel(){
+
+ if(levelChanging)return;
+
+ levelChanging=true;
+
+ mode="between";
+
+ document.getElementById("betweenTitle")
+ .textContent=
+ "✨ NIVEL "+levelNumber+" COMPLETADO ✨";
+
+ document.getElementById("betweenText")
+ .textContent=
+ "ECRA superó este escenario. ¡El siguiente desafío lo espera!";
+
+ document.getElementById("between")
+ .classList.remove("hide");
+
+}
+
+
+/* =========================
+   SIGUIENTE NIVEL
+========================= */
+
+function nextLevel(){
+
+ document.getElementById("between")
+ .classList.add("hide");
+
+ if(levelNumber>=5){
+
+  return;
+
+ }
+
+ mode="play";
+
+ createLevel(levelNumber+1);
+
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD(){
+
+ document.getElementById("lives")
+ .textContent=
+ "❤️".repeat(Math.max(0,lives));
+
+ document.getElementById("score")
+ .textContent=
+ "⭐ "+score;
+
+ updateStage();
+
+}
+
+
+function updateStage(){
+
+ const names=[
+
+  "COSTA TURQUESA",
+
+  "ARRECIFE DE CORAL",
+
+  "CUEVAS PROFUNDAS",
+
+  "TEMPLO SUMERGIDO",
+
+  "VOLCÁN DEL OCÉANO"
+
+ ];
+
+ document.getElementById("stage")
+ .textContent=
+ "NIVEL "+levelNumber+
+ " · "+
+ names[levelNumber-1];
+
+}
+
+
+/* =========================
+   LOOP
+========================= */
+
+function loop(time){
+
+ let dt=
+  Math.min(
+   .033,
+   (time-lastTime)/1000
+  )||0;
+
+ lastTime=time;
+
+ update(dt);
+
+ draw();
+
+ updateHUD();
+
+ requestAnimationFrame(loop);
+
+}
+
+requestAnimationFrame(loop);
+
+</script>
+
+</body>
+</html>

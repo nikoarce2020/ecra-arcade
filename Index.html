@@ -2,1675 +2,3395 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-      maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>ECRA - Water Quest</title>
+<title>ECRA WATER BLAST V5.5</title>
 
 <style>
 *{
     box-sizing:border-box;
-    margin:0;
-    padding:0;
-    -webkit-user-select:none;
-    user-select:none;
-    touch-action:none;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#06152b;
-    font-family:Arial,sans-serif;
-}
-
-#game{
-    position:fixed;
-    inset:0;
-    width:100vw;
-    height:100vh;
-    display:block;
-}
-
-#hud{
-    position:fixed;
-    top:8px;
-    left:8px;
-    right:8px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    z-index:10;
-    pointer-events:none;
-    color:white;
-    font-weight:bold;
-    text-shadow:2px 2px 3px #000;
-    font-size:16px;
-}
-
-#levelText{
-    text-align:center;
-    position:absolute;
-    left:50%;
-    transform:translateX(-50%);
-}
-
-#controls{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:10px;
-    height:125px;
-    z-index:20;
-    pointer-events:none;
-}
-
-.btn{
-    pointer-events:auto;
-    position:absolute;
-    width:70px;
-    height:70px;
-    border-radius:22px;
-    border:3px solid rgba(255,255,255,.75);
-    background:rgba(0,35,70,.72);
-    color:white;
-    font-size:31px;
-    font-weight:bold;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    box-shadow:0 5px 15px rgba(0,0,0,.4);
     -webkit-tap-highlight-color:transparent;
 }
 
-.btn:active{
-    transform:scale(.90);
-    background:rgba(0,170,220,.9);
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background:#07101d;
+    font-family:Arial,Helvetica,sans-serif;
+    overflow:hidden;
 }
 
-#left{
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#arcade{
+    width:min(1100px,98vw);
+    height:min(760px,98vh);
+    background:linear-gradient(#172338,#0b1424);
+    border:8px solid #17283e;
+    border-radius:25px;
+    box-shadow:
+        0 0 0 3px #334b69,
+        0 0 35px rgba(0,220,255,.25),
+        inset 0 0 30px rgba(0,0,0,.8);
+    display:flex;
+    flex-direction:column;
+    padding:14px;
+}
+
+#marquee{
+    height:105px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(180deg,#18263b,#101b2d);
+    border:3px solid #223954;
+    border-radius:18px;
+    box-shadow:
+        inset 0 0 20px #000,
+        0 0 12px rgba(0,220,255,.15);
+    flex-shrink:0;
+}
+
+.logo{
+    color:#35eaff;
+    font-size:clamp(35px,6vw,64px);
+    font-weight:900;
+    letter-spacing:6px;
+    line-height:.8;
+    text-shadow:
+        0 0 5px #00dfff,
+        0 0 15px #00dfff,
+        0 0 30px #008cff;
+}
+
+.subtitle{
+    margin-top:12px;
+    color:white;
+    font-size:clamp(10px,1.6vw,15px);
+    font-weight:bold;
+    letter-spacing:5px;
+    text-shadow:0 0 8px #00eaff;
+}
+
+#screenFrame{
+    flex:1;
+    min-height:0;
+    margin-top:12px;
+    padding:8px;
+    background:#08111e;
+    border:4px solid #273e5c;
+    border-radius:15px;
+    box-shadow:
+        inset 0 0 25px #000,
+        0 0 12px rgba(0,220,255,.15);
+    position:relative;
+}
+
+#game{
+    width:100%;
+    height:100%;
+    position:relative;
+    overflow:hidden;
+    border-radius:7px;
+    background:
+        linear-gradient(#38c9ed,#d8f8ff 55%,#58d9dd 56%,#087fa0 100%);
+}
+
+#game::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,.035) 0px,
+            rgba(255,255,255,.035) 2px,
+            rgba(0,0,0,.035) 3px,
+            rgba(0,0,0,.035) 5px
+        );
+    z-index:100;
+}
+
+#fallbackSky{
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 80% 20%,rgba(255,255,220,.9) 0 5%,transparent 6%),
+        linear-gradient(
+            to bottom,
+            #18bce8 0%,
+            #76e4ef 55%,
+            #a7ecdc 56%,
+            #20a9b7 75%,
+            #077891 100%
+        );
+    z-index:-1;
+}
+
+#background{
+    position:absolute;
+    inset:0;
+    background-position:center;
+    background-size:cover;
+    background-repeat:no-repeat;
+    z-index:0;
+}
+
+#hud{
+    position:absolute;
     left:12px;
-    bottom:8px;
-}
-
-#right{
-    left:92px;
-    bottom:8px;
-}
-
-#jump{
-    right:92px;
-    bottom:8px;
-}
-
-#water{
     right:12px;
-    bottom:8px;
-    font-size:25px;
+    top:10px;
+    display:flex;
+    justify-content:space-between;
+    z-index:90;
+    pointer-events:none;
 }
+
+.hudBox{
+    background:rgba(5,16,29,.82);
+    color:white;
+    padding:7px 11px;
+    border-radius:7px;
+    border:2px solid rgba(255,255,255,.18);
+    font-size:13px;
+    font-weight:900;
+    text-shadow:0 2px 2px #000;
+}
+
+#stageBox{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(140,45,45,.85);
+    color:white;
+    padding:7px 15px;
+    border-radius:7px;
+    font-weight:900;
+    z-index:90;
+    pointer-events:none;
+}
+
+#difficulty{
+    position:absolute;
+    top:45px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#fff;
+    background:rgba(0,0,0,.55);
+    padding:3px 9px;
+    border-radius:10px;
+    font-size:9px;
+    font-weight:bold;
+    letter-spacing:2px;
+    z-index:90;
+}
+
+.platform{
+    position:absolute;
+    height:16px;
+    border-radius:10px;
+    background:
+        linear-gradient(
+            to bottom,
+            #efffff 0%,
+            #4deaff 30%,
+            #16b6d1 65%,
+            #087a9c 100%
+        );
+    border:3px solid #d7ffff;
+    box-shadow:
+        0 0 6px rgba(0,240,255,.9),
+        inset 0 -4px 6px rgba(0,0,0,.25);
+    z-index:20;
+}
+
+#player{
+    position:absolute;
+    width:48px;
+    height:58px;
+    z-index:50;
+    pointer-events:none;
+    transform-origin:center bottom;
+    will-change:transform,left,top;
+    backface-visibility:hidden;
+}
+
+#player img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+    image-rendering:auto;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.45));
+    will-change:transform;
+}
+
+.enemy{
+    position:absolute;
+    width:48px;
+    height:48px;
+    z-index:45;
+    pointer-events:none;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.4));
+    will-change:transform,left,top;
+    backface-visibility:hidden;
+}
+
+.enemyBody{
+    width:100%;
+    height:100%;
+    position:relative;
+}
+
+.octopusBody{
+    position:absolute;
+    width:32px;
+    height:32px;
+    left:8px;
+    top:3px;
+    border-radius:50%;
+    background:
+        radial-gradient(circle at 35% 30%,#ffffff 0 7%,transparent 8%),
+        radial-gradient(circle at 65% 30%,#ffffff 0 7%,transparent 8%),
+        linear-gradient(#b78cff,#6741d8);
+    border:3px solid #5234aa;
+}
+
+.octopusEye{
+    position:absolute;
+    width:6px;
+    height:6px;
+    background:#182040;
+    border-radius:50%;
+    top:14px;
+    z-index:3;
+}
+
+.octopusEye.left{left:17px;}
+.octopusEye.right{left:28px;}
+
+.tentacle{
+    position:absolute;
+    bottom:1px;
+    width:9px;
+    height:23px;
+    border-radius:8px;
+    background:#7148db;
+    transform-origin:top center;
+}
+
+.t1{left:7px;transform:rotate(16deg);}
+.t2{left:15px;transform:rotate(5deg);}
+.t3{left:23px;transform:rotate(-5deg);}
+.t4{left:31px;transform:rotate(-16deg);}
+
+.crabBody{
+    position:absolute;
+    width:35px;
+    height:30px;
+    left:7px;
+    top:7px;
+    border-radius:50% 50% 42% 42%;
+    background:
+        radial-gradient(circle at 32% 25%,#fff 0 7%,transparent 8%),
+        radial-gradient(circle at 68% 25%,#fff 0 7%,transparent 8%),
+        linear-gradient(#ffb247,#df6323);
+    border:3px solid #bd4c1b;
+}
+
+.crabEye{
+    position:absolute;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#222;
+    top:14px;
+    z-index:4;
+}
+
+.crabEye.left{left:16px;}
+.crabEye.right{left:27px;}
+
+.claw{
+    position:absolute;
+    width:12px;
+    height:15px;
+    border:4px solid #df6323;
+    border-radius:50%;
+    top:8px;
+}
+
+.claw.left{left:-2px;transform:rotate(25deg);}
+.claw.right{right:-2px;transform:rotate(-25deg);}
+
+.leg{
+    position:absolute;
+    width:13px;
+    height:5px;
+    background:#df6323;
+    border-radius:5px;
+    top:35px;
+}
+
+.leg.l1{left:4px;transform:rotate(25deg);}
+.leg.l2{left:14px;transform:rotate(10deg);}
+.leg.l3{right:14px;transform:rotate(-10deg);}
+.leg.l4{right:4px;transform:rotate(-25deg);}
+
+.enemy.jumping .tentacle{
+    animation:wobble .22s infinite alternate;
+}
+
+@keyframes wobble{
+    from{transform:rotate(10deg);}
+    to{transform:rotate(-10deg);}
+}
+
+.waterShot{
+    position:absolute;
+    width:17px;
+    height:9px;
+    border-radius:10px;
+    background:
+        radial-gradient(circle at 35% 35%,#fff 0 15%,transparent 16%),
+        linear-gradient(90deg,#ffffff,#30eaff,#00a9ff);
+    box-shadow:
+        0 0 8px #00eaff,
+        0 0 14px #00bfff;
+    z-index:48;
+    will-change:left;
+}
+
+.drop{
+    position:absolute;
+    width:22px;
+    height:28px;
+    border-radius:60% 60% 60% 60% / 75% 75% 40% 40%;
+    background:
+        radial-gradient(circle at 35% 28%,#fff 0 12%,transparent 13%),
+        linear-gradient(#a9ffff,#00b9ed);
+    transform:rotate(45deg);
+    box-shadow:0 0 12px #00eaff;
+    z-index:42;
+    animation:dropFloat .7s infinite alternate;
+}
+
+@keyframes dropFloat{
+    from{transform:rotate(45deg) translateY(0);}
+    to{transform:rotate(45deg) translateY(-5px);}
+}
+
+#jellyfish{
+    position:absolute;
+    width:40px;
+    height:45px;
+    z-index:35;
+    display:none;
+}
+
+.jellyHead{
+    width:32px;
+    height:26px;
+    margin:auto;
+    border-radius:50% 50% 35% 35%;
+    background:rgba(255,110,230,.9);
+    border:3px solid #ff70ea;
+    box-shadow:0 0 12px #ff49db;
+}
+
+.jellyTentacle{
+    position:absolute;
+    width:6px;
+    height:22px;
+    background:#ff74e9;
+    border-radius:5px;
+    top:23px;
+}
+
+.jellyTentacle:nth-child(2){left:4px;}
+.jellyTentacle:nth-child(3){left:14px;}
+.jellyTentacle:nth-child(4){left:24px;}
+.jellyTentacle:nth-child(5){right:2px;}
 
 #message{
-    position:fixed;
+    position:absolute;
     inset:0;
-    z-index:30;
     display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-size:clamp(26px,6vw,58px);
+    font-weight:900;
+    text-align:center;
+    text-shadow:
+        0 0 10px #00eaff,
+        0 0 25px #00aaff;
+    z-index:110;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .15s;
+}
+
+#message.show{
+    opacity:1;
+}
+
+#gameOver{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    flex-direction:column;
-    background:rgba(0,8,25,.72);
     color:white;
+    z-index:120;
     text-align:center;
-    padding:25px;
 }
 
-#message h1{
-    font-size:clamp(35px,9vw,75px);
-    margin-bottom:15px;
-    text-shadow:0 0 20px #00eaff;
+#gameOver h1{
+    margin:0 0 12px;
+    font-size:clamp(30px,7vw,65px);
+    color:#ff6464;
+    text-shadow:0 0 15px #f00;
 }
 
-#message p{
+#gameOver p{
     font-size:18px;
-    margin-bottom:25px;
 }
 
-#start{
+#restart{
     border:0;
-    padding:16px 35px;
-    border-radius:18px;
-    font-size:21px;
-    font-weight:bold;
-    background:#00d9ff;
-    color:#00243b;
-    box-shadow:0 0 25px #00d9ff;
+    padding:12px 25px;
+    border-radius:12px;
+    background:#18d9ef;
+    color:#00121c;
+    font-size:17px;
+    font-weight:900;
+    cursor:pointer;
 }
 
-.hidden{
-    display:none!important;
+#controls{
+    height:78px;
+    margin-top:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:5px 25px;
+    flex-shrink:0;
 }
 
-@media(max-height:500px){
+.controlGroup{
+    display:flex;
+    gap:12px;
+}
+
+.arcadeBtn{
+    width:58px;
+    height:50px;
+    border:3px solid #244760;
+    border-radius:12px;
+    background:linear-gradient(#43e7f7,#0798b6);
+    color:white;
+    font-size:25px;
+    font-weight:900;
+    box-shadow:
+        0 5px 0 #07566a,
+        0 0 12px rgba(0,220,255,.25);
+    touch-action:none;
+    user-select:none;
+}
+
+.arcadeBtn:active{
+    transform:translateY(4px);
+    box-shadow:
+        0 1px 0 #07566a,
+        0 0 8px rgba(0,220,255,.3);
+}
+
+#shootBtn{
+    background:linear-gradient(#ffd64d,#f28b00);
+    border-color:#6c4c0b;
+    box-shadow:
+        0 5px 0 #754400,
+        0 0 12px rgba(255,180,0,.25);
+}
+
+@media(max-width:600px){
+
+    #arcade{
+        width:100vw;
+        height:100vh;
+        border-radius:0;
+        border-width:4px;
+        padding:6px;
+    }
+
+    #marquee{
+        height:75px;
+    }
+
+    #screenFrame{
+        margin-top:7px;
+        padding:4px;
+    }
+
     #controls{
-        height:90px;
-        bottom:5px;
+        height:75px;
+        padding:3px 8px;
     }
 
-    .btn{
-        width:56px;
-        height:56px;
-        border-radius:17px;
-        font-size:25px;
+    .arcadeBtn{
+        width:55px;
+        height:48px;
     }
 
-    #left{left:8px;bottom:3px}
-    #right{left:70px;bottom:3px}
-    #jump{right:70px;bottom:3px}
-    #water{right:8px;bottom:3px}
+    .controlGroup{
+        gap:7px;
+    }
+
+    .hudBox{
+        font-size:10px;
+        padding:5px 7px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="game"></canvas>
+<div id="arcade">
 
-<div id="hud">
-    <div id="lives">❤️❤️❤️❤️❤️❤️❤️</div>
-    <div id="levelText">COSTA TURQUESA</div>
-    <div id="score">000000</div>
+    <div id="marquee">
+        <div class="logo">ECRA</div>
+        <div class="subtitle">WATER BLAST</div>
+    </div>
+
+    <div id="screenFrame">
+
+        <div id="game">
+
+            <div id="fallbackSky"></div>
+            <div id="background"></div>
+
+            <div id="hud">
+
+                <div class="hudBox">
+                    SCORE <span id="score">000000</span>
+                </div>
+
+                <div class="hudBox">
+                    VIDAS <span id="lives">♥ ♥ ♥</span>
+                </div>
+
+            </div>
+
+            <div id="stageBox">
+                STAGE <span id="stage">1</span>
+            </div>
+
+            <div id="difficulty">
+                EXPERT
+            </div>
+
+            <div id="message"></div>
+
+            <div id="player">
+                <img id="playerImg" src="ecra_walk1.png">
+            </div>
+
+            <div id="jellyfish">
+
+                <div class="jellyHead"></div>
+                <div class="jellyTentacle"></div>
+                <div class="jellyTentacle"></div>
+                <div class="jellyTentacle"></div>
+                <div class="jellyTentacle"></div>
+
+            </div>
+
+            <div id="gameOver">
+
+                <h1>GAME OVER</h1>
+
+                <p>
+                    PUNTAJE:
+                    <span id="finalScore">0</span>
+                </p>
+
+                <button id="restart">
+                    JUGAR DE NUEVO
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="controls">
+
+        <div class="controlGroup">
+
+            <button class="arcadeBtn" id="leftBtn">
+                ◀
+            </button>
+
+            <button class="arcadeBtn" id="rightBtn">
+                ▶
+            </button>
+
+        </div>
+
+        <div class="controlGroup">
+
+            <button class="arcadeBtn" id="jumpBtn">
+                ▲
+            </button>
+
+            <button class="arcadeBtn" id="shootBtn">
+                ●
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 
-<div id="controls">
-    <div class="btn" id="left">←</div>
-    <div class="btn" id="right">→</div>
-    <div class="btn" id="jump">↑</div>
-    <div class="btn" id="water">💧</div>
-</div>
-
-<div id="message">
-    <h1>ECRA</h1>
-    <p>WATER QUEST</p>
-    <p>Una aventura bajo el océano</p>
-    <button id="start">JUGAR 🎮</button>
-</div>
 
 <script>
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+/* =========================================================
+   ECRA WATER BLAST V5.5
+   MOVIMIENTO FLUIDO
+   ========================================================= */
 
-let W=1280;
-let H=720;
 
-function resize(){
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    W=window.innerWidth;
-    H=window.innerHeight;
+/* ---------- ELEMENTOS ---------- */
 
-    canvas.width=W*dpr;
-    canvas.height=H*dpr;
-    canvas.style.width=W+"px";
-    canvas.style.height=H+"px";
+const game=document.getElementById("game");
+const background=document.getElementById("background");
 
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+const playerEl=document.getElementById("player");
+const playerImg=document.getElementById("playerImg");
+
+const scoreEl=document.getElementById("score");
+const livesEl=document.getElementById("lives");
+const stageEl=document.getElementById("stage");
+
+const messageEl=document.getElementById("message");
+const gameOverEl=document.getElementById("gameOver");
+const finalScoreEl=document.getElementById("finalScore");
+
+const jellyfishEl=document.getElementById("jellyfish");
+
+
+/* =========================================================
+   FONDOS
+   ========================================================= */
+
+const backgrounds={
+
+    1:"playa.png",
+    2:"barco.png",
+    3:"isla.png",
+    4:"cueva.png",
+    5:"monstruo.png"
+
+};
+
+let currentBackgroundLoaded=false;
+
+
+function setBackground(level){
+
+    background.style.backgroundImage="none";
+    background.style.backgroundColor="transparent";
+
+    currentBackgroundLoaded=false;
+
+    const file=backgrounds[level]||"playa.png";
+
+    const img=new Image();
+
+    img.onload=function(){
+
+        background.style.backgroundImage=
+            "url('"+file+"')";
+
+        currentBackgroundLoaded=true;
+
+    };
+
+    img.onerror=function(){
+
+        background.style.backgroundImage="none";
+        background.style.backgroundColor="transparent";
+
+        currentBackgroundLoaded=false;
+
+    };
+
+    img.src=file;
 }
 
-window.addEventListener("resize",resize);
-resize();
 
-/* =========================
-   DATOS DEL JUEGO
-========================= */
+/* =========================================================
+   TAMAÑO
+   ========================================================= */
 
-const levels=[
-    "COSTA TURQUESA",
-    "ARRECIFE DE CORAL",
-    "CUEVAS PROFUNDAS",
-    "TEMPLO SUMERGIDO",
-    "VOLCÁN DEL OCÉANO"
+let W=800;
+let H=450;
+
+
+function resizeGame(){
+
+    W=game.clientWidth;
+    H=game.clientHeight;
+
+    buildPlatforms();
+
+    if(!gameRunning && !transitioning){
+
+        placePlayer();
+
+    }
+
+}
+
+
+/* =========================================================
+   PLATAFORMAS
+   ========================================================= */
+
+let platforms=[];
+
+
+function buildPlatforms(){
+
+    platforms=[
+
+        {
+            x:0,
+            y:H*.91,
+            w:W,
+            h:16
+        },
+
+        {
+            x:W*.06,
+            y:H*.76,
+            w:W*.30,
+            h:16
+        },
+
+        {
+            x:W*.29,
+            y:H*.56,
+            w:W*.40,
+            h:16
+        },
+
+        {
+            x:W*.65,
+            y:H*.76,
+            w:W*.29,
+            h:16
+        }
+
+    ];
+
+
+    document
+        .querySelectorAll(".platform")
+        .forEach(p=>p.remove());
+
+
+    platforms.forEach((p,index)=>{
+
+        const el=document.createElement("div");
+
+        el.className="platform";
+
+        el.dataset.index=index;
+
+        el.style.left=p.x+"px";
+        el.style.top=p.y+"px";
+        el.style.width=p.w+"px";
+        el.style.height=p.h+"px";
+
+        game.appendChild(el);
+
+    });
+
+}
+
+
+/* =========================================================
+   JUGADOR
+   ========================================================= */
+
+const player={
+
+    x:0,
+    y:0,
+
+    w:48,
+    h:58,
+
+    vx:0,
+    vy:0,
+
+    /* MÁS VELOCIDAD */
+
+    speed:6.5,
+
+    jumpPower:13.4,
+
+    gravity:.62,
+
+    grounded:false,
+
+    currentPlatform:0,
+
+    direction:1,
+
+    invulnerable:0,
+
+    animTimer:0,
+
+    animFrame:0
+
+};
+
+
+/* =========================================================
+   SPRITES
+   ========================================================= */
+
+const walkSprites=[
+
+    "ecra_walk1.png",
+    "ecra_walk2.png",
+    "ecra_walk3.png",
+    "ecra_walk4.png"
+
 ];
 
-let level=0;
-let score=0;
-let lives=7;
-let gameStarted=false;
-let gameOver=false;
-let levelComplete=false;
-let bossActive=false;
 
-let cameraX=0;
+const idleCandidates=[
+
+    "ecra_idle.png",
+    "ecra_indle.png",
+    "ecra_walk1.png"
+
+];
+
+
+let idleSprite="ecra_walk1.png";
+
+
+function findIdleSprite(){
+
+    let index=0;
+
+
+    function test(){
+
+        if(index>=idleCandidates.length){
+
+            idleSprite="ecra_walk1.png";
+
+            return;
+        }
+
+
+        const img=new Image();
+
+
+        img.onload=function(){
+
+            idleSprite=idleCandidates[index];
+
+        };
+
+
+        img.onerror=function(){
+
+            index++;
+
+            test();
+
+        };
+
+
+        img.src=idleCandidates[index];
+
+    }
+
+
+    test();
+
+}
+
+
+/* =========================================================
+   CONTROLES
+   ========================================================= */
 
 const keys={
+
     left:false,
     right:false,
     jump:false,
-    water:false
+    shoot:false
+
 };
 
-let platforms=[];
-let enemies=[];
-let shots=[];
-let bubbles=[];
-let particles=[];
 
-let portal=null;
-let boss=null;
+let jumpPressed=false;
+let shootPressed=false;
 
-const player={
-    x:120,
-    y:400,
-    w:45,
-    h:65,
-    vx:0,
-    vy:0,
-    speed:4.5,
-    jump:-12,
-    grounded:false,
-    direction:1,
-    invincible:0,
-    shootCooldown:0,
-    anim:0
-};
-
-/* =========================
-   CONTROLES
-========================= */
 
 function bindButton(id,key){
-    const b=document.getElementById(id);
 
-    const down=e=>{
+    const btn=document.getElementById(id);
+
+
+    const down=function(e){
+
         e.preventDefault();
+
         keys[key]=true;
+
+
+        if(key==="jump"){
+
+            jumpPressed=true;
+
+        }
+
+
+        if(key==="shoot"){
+
+            shootPressed=true;
+
+        }
+
     };
 
-    const up=e=>{
+
+    const up=function(e){
+
         e.preventDefault();
+
         keys[key]=false;
+
     };
 
-    b.addEventListener("touchstart",down,{passive:false});
-    b.addEventListener("touchend",up,{passive:false});
-    b.addEventListener("touchcancel",up,{passive:false});
 
-    b.addEventListener("mousedown",down);
-    b.addEventListener("mouseup",up);
-    b.addEventListener("mouseleave",up);
+    btn.addEventListener(
+        "touchstart",
+        down,
+        {passive:false}
+    );
+
+    btn.addEventListener(
+        "touchend",
+        up,
+        {passive:false}
+    );
+
+    btn.addEventListener(
+        "touchcancel",
+        up,
+        {passive:false}
+    );
+
+    btn.addEventListener(
+        "mousedown",
+        down
+    );
+
+    btn.addEventListener(
+        "mouseup",
+        up
+    );
+
+    btn.addEventListener(
+        "mouseleave",
+        up
+    );
+
 }
 
-bindButton("left","left");
-bindButton("right","right");
-bindButton("jump","jump");
-bindButton("water","water");
 
-window.addEventListener("keydown",e=>{
-    if(e.key==="ArrowLeft"||e.key==="a")
-        keys.left=true;
+bindButton("leftBtn","left");
+bindButton("rightBtn","right");
+bindButton("jumpBtn","jump");
+bindButton("shootBtn","shoot");
 
-    if(e.key==="ArrowRight"||e.key==="d")
-        keys.right=true;
 
-    if(e.key==="ArrowUp"||e.key==="w"||e.key==="z")
-        keys.jump=true;
+document.addEventListener(
+    "keydown",
+    function(e){
 
-    if(e.key===" "||e.key==="x")
-        keys.water=true;
-});
+        if(
+            e.key==="ArrowLeft" ||
+            e.key==="a" ||
+            e.key==="A"
+        ){
 
-window.addEventListener("keyup",e=>{
-    if(e.key==="ArrowLeft"||e.key==="a")
-        keys.left=false;
+            keys.left=true;
 
-    if(e.key==="ArrowRight"||e.key==="d")
-        keys.right=false;
+        }
 
-    if(e.key==="ArrowUp"||e.key==="w"||e.key==="z")
-        keys.jump=false;
 
-    if(e.key===" "||e.key==="x")
-        keys.water=false;
-});
+        if(
+            e.key==="ArrowRight" ||
+            e.key==="d" ||
+            e.key==="D"
+        ){
 
-/* =========================
-   UTILIDADES
-========================= */
+            keys.right=true;
 
-function rand(a,b){
-    return Math.random()*(b-a)+a;
-}
+        }
 
-function hit(a,b){
-    return a.x<a.x+a.w &&
-           a.x+a.w>b.x &&
-           a.y<b.y+b.h &&
-           a.y+a.h>b.y;
-}
 
-function rectHit(a,b){
-    return a.x < b.x+b.w &&
-           a.x+a.w > b.x &&
-           a.y < b.y+b.h &&
-           a.y+a.h > b.y;
-}
+        if(
+            e.key==="ArrowUp" ||
+            e.key==="w" ||
+            e.key==="W" ||
+            e.key===" "
+        ){
 
-function addParticle(x,y,type="water"){
-    particles.push({
-        x:x,
-        y:y,
-        vx:rand(-2,2),
-        vy:rand(-3,1),
-        life:1,
-        type:type
-    });
-}
+            if(!keys.jump){
 
-/* =========================
-   ESCENARIOS
-========================= */
+                jumpPressed=true;
 
-function createLevel(){
+            }
 
-    platforms=[];
-    enemies=[];
-    shots=[];
-    bubbles=[];
-    particles=[];
-    portal=null;
-    boss=null;
-    bossActive=false;
+            keys.jump=true;
 
-    player.x=100;
-    player.y=300;
+            e.preventDefault();
+
+        }
+
+
+        if(
+            e.key==="z" ||
+            e.key==="Z" ||
+            e.key==="x" ||
+            e.key==="X"
+        ){
+
+            keys.shoot=true;
+
+            shootPressed=true;
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(e){
+
+        if(
+            e.key==="ArrowLeft" ||
+            e.key==="a" ||
+            e.key==="A"
+        ){
+
+            keys.left=false;
+
+        }
+
+
+        if(
+            e.key==="ArrowRight" ||
+            e.key==="d" ||
+            e.key==="D"
+        ){
+
+            keys.right=false;
+
+        }
+
+
+        if(
+            e.key==="ArrowUp" ||
+            e.key==="w" ||
+            e.key==="W" ||
+            e.key===" "
+        ){
+
+            keys.jump=false;
+
+        }
+
+
+        if(
+            e.key==="z" ||
+            e.key==="Z" ||
+            e.key==="x" ||
+            e.key==="X"
+        ){
+
+            keys.shoot=false;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   COLOCAR JUGADOR
+   ========================================================= */
+
+function placePlayer(){
+
+    if(!platforms.length)return;
+
+    const p=platforms[0];
+
+    player.x=
+        W*.50-player.w/2;
+
+    player.y=
+        p.y-player.h;
+
     player.vx=0;
     player.vy=0;
-    player.invincible=2;
 
-    const groundY=H-145;
+    player.grounded=true;
 
-    platforms.push({
-        x:-200,
-        y:groundY,
-        w:1700,
-        h:35
-    });
+    player.currentPlatform=0;
 
-    if(level===0){
+    updatePlayerElement();
 
-        platforms.push({x:180,y:groundY-125,w:210,h:22});
-        platforms.push({x:500,y:groundY-230,w:220,h:22});
-        platforms.push({x:850,y:groundY-130,w:230,h:22});
-        platforms.push({x:1160,y:groundY-260,w:220,h:22});
+}
 
-    }else if(level===1){
 
-        platforms.push({x:120,y:groundY-180,w:190,h:22});
-        platforms.push({x:390,y:groundY-80,w:170,h:22});
-        platforms.push({x:650,y:groundY-250,w:220,h:22});
-        platforms.push({x:980,y:groundY-120,w:210,h:22});
-        platforms.push({x:1250,y:groundY-300,w:190,h:22});
+function updatePlayerElement(){
 
-    }else if(level===2){
+    playerEl.style.left=
+        player.x+"px";
 
-        platforms.push({x:150,y:groundY-100,w:180,h:22});
-        platforms.push({x:400,y:groundY-240,w:190,h:22});
-        platforms.push({x:700,y:groundY-130,w:180,h:22});
-        platforms.push({x:950,y:groundY-280,w:200,h:22});
-        platforms.push({x:1250,y:groundY-160,w:180,h:22});
+    playerEl.style.top=
+        player.y+"px";
 
-    }else if(level===3){
 
-        platforms.push({x:120,y:groundY-220,w:200,h:22});
-        platforms.push({x:430,y:groundY-100,w:180,h:22});
-        platforms.push({x:700,y:groundY-280,w:220,h:22});
-        platforms.push({x:1000,y:groundY-150,w:190,h:22});
-        platforms.push({x:1300,y:groundY-300,w:200,h:22});
+    playerEl.style.transform=
+        "scaleX("+
+        (player.direction===1?-1:1)+
+        ")";
+
+}
+
+
+/* =========================================================
+   ANIMACIÓN
+   ========================================================= */
+
+let lastMoving=false;
+
+
+function updatePlayerSprite(dt=1){
+
+    const moving=
+        Math.abs(player.vx)>.3 &&
+        player.grounded;
+
+
+    if(moving){
+
+        /* ANIMACIÓN MÁS RÁPIDA */
+
+        player.animTimer+=dt;
+
+
+        if(player.animTimer>4){
+
+            player.animTimer=0;
+
+            player.animFrame++;
+
+
+            if(
+                player.animFrame>=
+                walkSprites.length
+            ){
+
+                player.animFrame=0;
+
+            }
+
+        }
+
+
+        const newSprite=
+            walkSprites[player.animFrame];
+
+
+        if(
+            !playerImg.src.endsWith(newSprite)
+        ){
+
+            playerImg.src=newSprite;
+
+        }
+
+
+        lastMoving=true;
 
     }else{
 
-        platforms.push({x:140,y:groundY-170,w:190,h:22});
-        platforms.push({x:430,y:groundY-300,w:200,h:22});
-        platforms.push({x:740,y:groundY-180,w:190,h:22});
-        platforms.push({x:1050,y:groundY-330,w:220,h:22});
-    }
+        if(lastMoving){
 
-    createEnemies();
+            playerImg.src=idleSprite;
 
-    if(level<4){
-        portal={
-            x:1450,
-            y:groundY-90,
-            w:55,
-            h:90
-        };
-    }
-}
+            player.animFrame=0;
 
-/* =========================
-   ENEMIGOS
-========================= */
+            player.animTimer=0;
 
-function createEnemies(){
-
-    const groundY=H-145;
-
-    const types=["octopus","crab","jelly"];
-
-    for(let i=0;i<7;i++){
-
-        const type=types[i%types.length];
-
-        enemies.push({
-            x:260+i*190,
-            y:groundY-65-rand(0,180),
-            w:50,
-            h:50,
-            vx:rand(-1.2,1.2),
-            vy:0,
-            type:type,
-            life:2,
-            phase:rand(0,6),
-            dir:Math.random()<.5?-1:1
-        });
-    }
-}
-
-/* =========================
-   FONDO
-========================= */
-
-function drawBackground(){
-
-    let g;
-
-    if(level===0){
-        g=ctx.createLinearGradient(0,0,0,H);
-        g.addColorStop(0,"#38d8ff");
-        g.addColorStop(1,"#00518a");
-    }
-
-    if(level===1){
-        g=ctx.createLinearGradient(0,0,0,H);
-        g.addColorStop(0,"#00aabf");
-        g.addColorStop(1,"#123f75");
-    }
-
-    if(level===2){
-        g=ctx.createLinearGradient(0,0,0,H);
-        g.addColorStop(0,"#164e83");
-        g.addColorStop(1,"#030b25");
-    }
-
-    if(level===3){
-        g=ctx.createLinearGradient(0,0,0,H);
-        g.addColorStop(0,"#102b69");
-        g.addColorStop(1,"#09091e");
-    }
-
-    if(level===4){
-        g=ctx.createLinearGradient(0,0,0,H);
-        g.addColorStop(0,"#321452");
-        g.addColorStop(1,"#090313");
-    }
-
-    ctx.fillStyle=g;
-    ctx.fillRect(0,0,W,H);
-
-    /* burbujas */
-
-    for(let i=0;i<35;i++){
-
-        let x=((i*157-cameraX*.12)%(W+100))-50;
-        let y=(i*83+performance.now()/35*(i%3+1))%H;
-
-        ctx.beginPath();
-        ctx.arc(x,y,2+(i%4),0,Math.PI*2);
-        ctx.strokeStyle="rgba(255,255,255,.3)";
-        ctx.stroke();
-    }
-
-    /* fondo decorativo */
-
-    ctx.fillStyle="rgba(0,0,30,.18)";
-
-    for(let i=0;i<12;i++){
-
-        let x=i*180-cameraX*.2;
-
-        ctx.beginPath();
-        ctx.arc(x,H-70,90,Math.PI,Math.PI*2);
-        ctx.fill();
-    }
-}
-
-/* =========================
-   PLATAFORMAS
-========================= */
-
-function drawPlatforms(){
-
-    for(const p of platforms){
-
-        const x=p.x-cameraX;
-
-        if(x+p.w<0||x>W) continue;
-
-        let grad=ctx.createLinearGradient(x,p.y,x,p.y+p.h);
-
-        if(level===0){
-            grad.addColorStop(0,"#62ffe8");
-            grad.addColorStop(1,"#007b91");
         }
 
-        if(level===1){
-            grad.addColorStop(0,"#ff78d1");
-            grad.addColorStop(1,"#7c247b");
-        }
+        lastMoving=false;
 
-        if(level===2){
-            grad.addColorStop(0,"#6688a8");
-            grad.addColorStop(1,"#1b2940");
-        }
-
-        if(level===3){
-            grad.addColorStop(0,"#c6a25a");
-            grad.addColorStop(1,"#58401a");
-        }
-
-        if(level===4){
-            grad.addColorStop(0,"#ff713b");
-            grad.addColorStop(1,"#72120b");
-        }
-
-        ctx.fillStyle=grad;
-        ctx.fillRect(x,p.y,p.w,p.h);
-
-        ctx.fillStyle="rgba(255,255,255,.3)";
-        ctx.fillRect(x,p.y,p.w,4);
-    }
-}
-
-/* =========================
-   ECRA
-========================= */
-
-function drawPlayer(){
-
-    const x=player.x-cameraX;
-    const y=player.y;
-
-    ctx.save();
-
-    if(player.direction<0){
-        ctx.translate(x+player.w,y);
-        ctx.scale(-1,1);
-    }else{
-        ctx.translate(x,y);
     }
 
-    const walking=Math.abs(player.vx)>.3;
-
-    let bob=walking?Math.sin(player.anim)*3:0;
-
-    /* mochila de agua */
-
-    ctx.fillStyle="#273746";
-    ctx.fillRect(2,18+bob,16,34);
-
-    ctx.fillStyle="#00eaff";
-    ctx.fillRect(5,23+bob,10,18);
-
-    /* piernas */
-
-    ctx.strokeStyle="#263238";
-    ctx.lineWidth=8;
-    ctx.lineCap="round";
-
-    if(walking){
-        ctx.beginPath();
-        ctx.moveTo(20,52+bob);
-        ctx.lineTo(14,65+bob+Math.sin(player.anim)*5);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(32,52+bob);
-        ctx.lineTo(39,65+bob-Math.sin(player.anim)*5);
-        ctx.stroke();
-    }else{
-        ctx.beginPath();
-        ctx.moveTo(20,52+bob);
-        ctx.lineTo(18,65+bob);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(32,52+bob);
-        ctx.lineTo(35,65+bob);
-        ctx.stroke();
-    }
-
-    /* zapatillas */
-
-    ctx.fillStyle="#111";
-    ctx.fillRect(9,62+bob,14,6);
-    ctx.fillRect(32,62+bob,14,6);
-
-    /* cuerpo */
-
-    ctx.fillStyle=level===4?"#fff":"#111";
-    ctx.fillRect(13,22+bob,29,32);
-
-    /* camiseta ECRA */
-
-    ctx.fillStyle=level===4?"#ff4c4c":"#00d9ff";
-    ctx.font="bold 9px Arial";
-    ctx.fillText("ECRA",17,41+bob);
-
-    /* cabeza */
-
-    ctx.fillStyle="#ffc49b";
-    ctx.beginPath();
-    ctx.arc(28,14+bob,14,0,Math.PI*2);
-    ctx.fill();
-
-    /* gorra */
-
-    ctx.fillStyle="#ff3ba7";
-    ctx.beginPath();
-    ctx.arc(28,5+bob,14,Math.PI,Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle="#20e0ff";
-    ctx.fillRect(14,3+bob,30,6);
-
-    ctx.fillStyle="#ffe600";
-    ctx.fillRect(23,-2+bob,9,7);
-
-    /* brazo */
-
-    ctx.strokeStyle="#ffc49b";
-    ctx.lineWidth=7;
-
-    ctx.beginPath();
-    ctx.moveTo(39,28+bob);
-    ctx.lineTo(50,34+bob);
-    ctx.stroke();
-
-    /* pistola de agua */
-
-    ctx.fillStyle="#7cf6ff";
-    ctx.fillRect(45,29+bob,14,7);
-
-    ctx.fillStyle="#fff";
-    ctx.fillRect(55,30+bob,9,4);
-
-    ctx.restore();
 }
 
-/* =========================
-   ENEMIGOS
-========================= */
 
-function drawEnemy(e){
+/* =========================================================
+   SALTO
+   ========================================================= */
 
-    const x=e.x-cameraX;
-    const y=e.y;
+function jumpPlayer(){
 
-    ctx.save();
-    ctx.translate(x,y);
+    if(player.grounded){
 
-    if(e.type==="octopus"){
+        player.vy=
+            -player.jumpPower;
 
-        ctx.fillStyle="#d832d8";
-        ctx.beginPath();
-        ctx.arc(25,20,22,Math.PI,0);
-        ctx.fill();
-
-        ctx.strokeStyle="#b91fc1";
-        ctx.lineWidth=6;
-
-        for(let i=0;i<5;i++){
-
-            ctx.beginPath();
-            ctx.moveTo(8+i*9,28);
-            ctx.lineTo(
-                3+i*11,
-                48+Math.sin(performance.now()/150+e.phase+i)*7
-            );
-            ctx.stroke();
-        }
-
-        ctx.fillStyle="#fff";
-        ctx.beginPath();
-        ctx.arc(18,17,5,0,Math.PI*2);
-        ctx.arc(32,17,5,0,Math.PI*2);
-        ctx.fill();
-
-        ctx.fillStyle="#111";
-        ctx.beginPath();
-        ctx.arc(18,17,2,0,Math.PI*2);
-        ctx.arc(32,17,2,0,Math.PI*2);
-        ctx.fill();
-
-    }else if(e.type==="crab"){
-
-        ctx.fillStyle="#ff6038";
-        ctx.beginPath();
-        ctx.arc(25,27,20,0,Math.PI*2);
-        ctx.fill();
-
-        ctx.strokeStyle="#ff6038";
-        ctx.lineWidth=5;
-
-        for(let i=0;i<3;i++){
-
-            ctx.beginPath();
-            ctx.moveTo(10,30+i*6);
-            ctx.lineTo(-5,25+i*10);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(40,30+i*6);
-            ctx.lineTo(55,25+i*10);
-            ctx.stroke();
-        }
-
-        ctx.fillStyle="#fff";
-        ctx.beginPath();
-        ctx.arc(18,15,5,0,Math.PI*2);
-        ctx.arc(32,15,5,0,Math.PI*2);
-        ctx.fill();
-
-    }else{
-
-        ctx.fillStyle="#74fff0";
-        ctx.beginPath();
-        ctx.arc(25,24,22,0,Math.PI*2);
-        ctx.fill();
-
-        ctx.strokeStyle="#74fff0";
-        ctx.lineWidth=5;
-
-        for(let i=0;i<4;i++){
-
-            ctx.beginPath();
-            ctx.moveTo(12+i*8,40);
-            ctx.lineTo(8+i*9,57);
-            ctx.stroke();
-        }
-
-        ctx.fillStyle="#111";
-
-        ctx.beginPath();
-        ctx.arc(18,21,3,0,Math.PI*2);
-        ctx.arc(32,21,3,0,Math.PI*2);
-        ctx.fill();
-    }
-
-    ctx.restore();
-}
-
-/* =========================
-   AGUA
-========================= */
-
-function shootWater(){
-
-    if(player.shootCooldown>0) return;
-
-    player.shootCooldown=.28;
-
-    const power=Math.floor(Math.random()*4);
-
-    shots.push({
-        x:player.x+(player.direction>0?45:-15),
-        y:player.y+30,
-        vx:player.direction*10,
-        vy:0,
-        r:8,
-        power:power,
-        life:1.5
-    });
-
-    for(let i=0;i<5;i++)
-        addParticle(player.x+25,player.y+30);
-}
-
-function drawShot(s){
-
-    const x=s.x-cameraX;
-
-    ctx.save();
-
-    if(s.power===0){
-
-        ctx.fillStyle="#6fffff";
-        ctx.beginPath();
-        ctx.arc(x,s.y,8,0,Math.PI*2);
-        ctx.fill();
-
-    }else if(s.power===1){
-
-        ctx.strokeStyle="#00eaff";
-        ctx.lineWidth=7;
-        ctx.beginPath();
-        ctx.moveTo(x-15,s.y);
-        ctx.lineTo(x+15,s.y);
-        ctx.stroke();
-
-    }else if(s.power===2){
-
-        ctx.strokeStyle="#4cffb8";
-        ctx.lineWidth=10;
-        ctx.beginPath();
-        ctx.arc(x,s.y,15,0,Math.PI*2);
-        ctx.stroke();
-
-    }else{
-
-        ctx.fillStyle="#b9ffff";
-        ctx.beginPath();
-        ctx.arc(x,s.y,17+Math.sin(performance.now()/50)*4,0,Math.PI*2);
-        ctx.fill();
-    }
-
-    ctx.restore();
-}
-
-/* =========================
-   BUBBLES
-========================= */
-
-function createBubble(x,y){
-
-    bubbles.push({
-        x:x,
-        y:y,
-        r:30,
-        life:5
-    });
-}
-
-function drawBubble(b){
-
-    ctx.strokeStyle="rgba(160,255,255,.85)";
-    ctx.lineWidth=4;
-
-    ctx.beginPath();
-    ctx.arc(b.x-cameraX,b.y,b.r,0,Math.PI*2);
-    ctx.stroke();
-
-    ctx.fillStyle="rgba(255,255,255,.18)";
-    ctx.beginPath();
-    ctx.arc(b.x-cameraX-10,b.y-10,8,0,Math.PI*2);
-    ctx.fill();
-}
-
-/* =========================
-   BOSS
-========================= */
-
-function createBoss(){
-
-    bossActive=true;
-
-    boss={
-        x:1150,
-        y:180,
-        w:230,
-        h:220,
-        hp:35,
-        maxHp:35,
-        vx:-1,
-        phase:0,
-        attackTimer:2,
-        tentacles:[0,0,0,0,0,0]
-    };
-}
-
-function drawBoss(){
-
-    if(!boss) return;
-
-    const x=boss.x-cameraX;
-    const y=boss.y;
-
-    ctx.save();
-
-    /* tentáculos */
-
-    ctx.strokeStyle="#7137d8";
-    ctx.lineWidth=20;
-    ctx.lineCap="round";
-
-    for(let i=0;i<6;i++){
-
-        const tx=x+35+i*30;
-        const ty=y+170;
-
-        ctx.beginPath();
-        ctx.moveTo(tx,ty);
-
-        ctx.quadraticCurveTo(
-            tx-30,
-            ty+70,
-            tx+Math.sin(boss.phase+i)*45,
-            ty+120
-        );
-
-        ctx.stroke();
-    }
-
-    /* cuerpo */
-
-    ctx.fillStyle="#4b2497";
-
-    ctx.beginPath();
-    ctx.ellipse(
-        x+115,
-        y+100,
-        110,
-        105,
-        0,0,Math.PI*2
-    );
-
-    ctx.fill();
-
-    /* ojos */
-
-    ctx.fillStyle="#fff";
-
-    ctx.beginPath();
-    ctx.arc(x+80,y+75,28,0,Math.PI*2);
-    ctx.arc(x+150,y+75,28,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle="#111";
-
-    ctx.beginPath();
-    ctx.arc(x+80,y+75,10,0,Math.PI*2);
-    ctx.arc(x+150,y+75,10,0,Math.PI*2);
-    ctx.fill();
-
-    /* boca */
-
-    ctx.strokeStyle="#111";
-    ctx.lineWidth=8;
-
-    ctx.beginPath();
-    ctx.arc(x+115,y+115,45,0,Math.PI);
-    ctx.stroke();
-
-    ctx.restore();
-
-    /* barra de vida */
-
-    const barW=Math.min(400,W*.65);
-    const bx=(W-barW)/2;
-    const by=60;
-
-    ctx.fillStyle="rgba(0,0,0,.6)";
-    ctx.fillRect(bx,by,barW,22);
-
-    ctx.fillStyle="#ff334f";
-    ctx.fillRect(
-        bx,
-        by,
-        barW*(boss.hp/boss.maxHp),
-        22
-    );
-
-    ctx.strokeStyle="#fff";
-    ctx.strokeRect(bx,by,barW,22);
-
-    ctx.fillStyle="#fff";
-    ctx.font="bold 15px Arial";
-    ctx.textAlign="center";
-    ctx.fillText(
-        "REY DE LAS PROFUNDIDADES",
-        W/2,
-        by-7
-    );
-    ctx.textAlign="left";
-}
-
-/* =========================
-   UPDATE JUGADOR
-========================= */
-
-function updatePlayer(dt){
-
-    if(player.invincible>0)
-        player.invincible-=dt;
-
-    if(player.shootCooldown>0)
-        player.shootCooldown-=dt;
-
-    player.vx=0;
-
-    if(keys.left){
-        player.vx=-player.speed;
-        player.direction=-1;
-    }
-
-    if(keys.right){
-        player.vx=player.speed;
-        player.direction=1;
-    }
-
-    if(keys.jump && player.grounded){
-
-        player.vy=player.jump;
         player.grounded=false;
 
-        keys.jump=false;
+        player.currentPlatform=-1;
+
     }
 
-    if(keys.water)
-        shootWater();
+}
 
-    player.vy+=.55;
 
-    player.x+=player.vx;
-    player.y+=player.vy;
+/* =========================================================
+   DELTA TIME
+   ========================================================= */
+
+let lastFrameTime=performance.now();
+
+
+function getFrameScale(){
+
+    const now=performance.now();
+
+    let delta=
+        now-lastFrameTime;
+
+    lastFrameTime=now;
+
+
+    if(delta>50){
+
+        delta=50;
+
+    }
+
+
+    return delta/16.6667;
+
+}
+
+
+/* =========================================================
+   FÍSICA DEL JUGADOR
+   ========================================================= */
+
+function updatePlayer(dt=1){
+
+    if(player.invulnerable>0){
+
+        player.invulnerable-=dt;
+
+        if(player.invulnerable<0){
+
+            player.invulnerable=0;
+
+        }
+
+    }
+
+
+    if(keys.left && !keys.right){
+
+        player.vx=-player.speed;
+
+        player.direction=-1;
+
+    }
+
+    else if(keys.right && !keys.left){
+
+        player.vx=player.speed;
+
+        player.direction=1;
+
+    }
+
+    else{
+
+        player.vx*=Math.pow(.75,dt);
+
+        if(Math.abs(player.vx)<.05){
+
+            player.vx=0;
+
+        }
+
+    }
+
+
+    if(jumpPressed){
+
+        jumpPlayer();
+
+        jumpPressed=false;
+
+    }
+
+
+    player.x+=player.vx*dt;
+
+
+    if(player.x<0){
+
+        player.x=0;
+
+    }
+
+
+    if(player.x>W-player.w){
+
+        player.x=W-player.w;
+
+    }
+
+
+    const oldBottom=
+        player.y+player.h;
+
+
+    player.vy+=
+        player.gravity*dt;
+
+
+    if(player.vy>16){
+
+        player.vy=16;
+
+    }
+
+
+    player.y+=
+        player.vy*dt;
+
 
     player.grounded=false;
 
-    for(const p of platforms){
+    player.currentPlatform=-1;
 
-        if(
-            player.x+player.w>p.x &&
-            player.x<p.x+p.w &&
-            player.y+player.h<=p.y+12 &&
-            player.y+player.h+player.vy>=p.y
-        ){
 
-            player.y=p.y-player.h;
+    for(
+        let i=0;
+        i<platforms.length;
+        i++
+    ){
+
+        const p=platforms[i];
+
+
+        const horizontal=
+
+            player.x+
+            player.w-
+            7>p.x &&
+
+            player.x+
+            7<
+            p.x+p.w;
+
+
+        const crossing=
+
+            oldBottom<=p.y+5 &&
+
+            player.y+
+            player.h>=p.y &&
+
+            player.vy>=0;
+
+
+        if(horizontal && crossing){
+
+            player.y=
+                p.y-player.h;
+
             player.vy=0;
+
             player.grounded=true;
+
+            player.currentPlatform=i;
+
+            break;
+
         }
+
     }
 
-    if(player.y>H+200){
-        loseLife();
-    }
 
-    player.anim+=Math.abs(player.vx)dt.5;
+    updatePlayerElement();
 
-    cameraX=player.x-W*.35;
+    updatePlayerSprite(dt);
 
-    if(cameraX<0)
-        cameraX=0;
 }
 
-/* =========================
-   UPDATE ENEMIGOS
-========================= */
 
-function updateEnemies(dt){
+/* =========================================================
+   ENEMIGOS
+   ========================================================= */
 
-    for(let i=enemies.length-1;i>=0;i--){
+let enemies=[];
+let enemyId=0;
 
-        const e=enemies[i];
 
-        e.phase+=dt*3;
+function createEnemy(
+    type,
+    platformIndex,
+    x
+){
 
-        e.x+=e.vx;
+    const e={
 
-        if(e.type==="octopus"){
-            e.y+=Math.sin(e.phase)*.6;
+        id:enemyId++,
+
+        type:type,
+
+        x:x,
+
+        y:0,
+
+        w:48,
+
+        h:48,
+
+        vx:0,
+
+        vy:0,
+
+        /* MÁS VELOCIDAD */
+
+        speed:3.0,
+
+        jumpPower:12.4,
+
+        gravity:.57,
+
+        grounded:false,
+
+        platformIndex:platformIndex,
+
+        targetPlatform:platformIndex,
+
+        route:[],
+
+        routePos:0,
+
+        waitTimer:0,
+
+        jumpCooldown:0,
+
+        hp:4,
+
+        element:null,
+
+        direction:1,
+
+        alive:true,
+
+        separationSeed:
+            Math.random()*100
+
+    };
+
+
+    if(type==="octopus"){
+
+        if(enemies.length%3===0){
+
+            e.route=[1,2,3,0];
+
         }
 
-        if(e.type==="jelly"){
-            e.y+=Math.sin(e.phase)*1.2;
+        else if(enemies.length%3===1){
+
+            e.route=[1,2,0,3];
+
         }
 
-        if(e.type==="crab"){
+        else{
 
-            e.x+=e.dir*.8;
+            e.route=[2,1,0,3];
 
-            if(e.x<50||e.x>1450)
-                e.dir*=-1;
         }
 
-        const enemyBox={
-            x:e.x,
-            y:e.y,
-            w:e.w,
-            h:e.h
-        };
-
-        const playerBox={
-            x:player.x,
-            y:player.y,
-            w:player.w,
-            h:player.h
-        };
-
-        if(
-            player.invincible<=0 &&
-            rectHit(playerBox,enemyBox)
-        ){
-
-            loseLife();
-        }
     }
+
+    else{
+
+        if(enemies.length%3===0){
+
+            e.route=[2,3,0,1];
+
+        }
+
+        else if(enemies.length%3===1){
+
+            e.route=[2,1,0,3];
+
+        }
+
+        else{
+
+            e.route=[3,2,0,1];
+
+        }
+
+    }
+
+
+    if(platformIndex===1){
+
+        e.waitTimer=150;
+
+    }
+
+    if(platformIndex===2){
+
+        e.waitTimer=190;
+
+    }
+
+    if(platformIndex===3){
+
+        e.waitTimer=125;
+
+    }
+
+
+    e.y=
+        platforms[platformIndex].y-
+        e.h;
+
+
+    createEnemyElement(e);
+
+    enemies.push(e);
+
+    return e;
+
 }
 
-/* =========================
-   UPDATE AGUA
-========================= */
 
-function updateShots(dt){
+/* =========================================================
+   ELEMENTO VISUAL ENEMIGO
+   ========================================================= */
 
-    for(let i=shots.length-1;i>=0;i--){
+function createEnemyElement(e){
 
-        const s=shots[i];
+    const div=
+        document.createElement("div");
 
-        s.x+=s.vx;
-        s.y+=s.vy;
-        s.life-=dt;
 
-        let destroyed=false;
+    div.className="enemy";
 
-        for(let j=enemies.length-1;j>=0;j--){
 
-            const e=enemies[j];
+    if(e.type==="octopus"){
 
-            const dx=s.x-(e.x+25);
-            const dy=s.y-(e.y+25);
+        div.innerHTML=`
 
-            if(Math.sqrt(dx*dx+dy*dy)<35){
+            <div class="enemyBody">
 
-                e.life--;
+                <div class="octopusBody"></div>
 
-                createBubble(
-                    e.x+25,
-                    e.y+25
-                );
+                <div class="octopusEye left"></div>
 
-                for(let p=0;p<15;p++)
-                    addParticle(e.x+25,e.y+25);
+                <div class="octopusEye right"></div>
 
-                score+=100;
+                <div class="tentacle t1"></div>
 
-                destroyed=true;
+                <div class="tentacle t2"></div>
 
-                if(e.life<=0){
+                <div class="tentacle t3"></div>
 
-                    score+=300;
+                <div class="tentacle t4"></div>
 
-                    enemies.splice(j,1);
-                }
+            </div>
 
-                break;
-            }
+        `;
+
+    }
+
+    else{
+
+        div.innerHTML=`
+
+            <div class="enemyBody">
+
+                <div class="crabBody"></div>
+
+                <div class="crabEye left"></div>
+
+                <div class="crabEye right"></div>
+
+                <div class="claw left"></div>
+
+                <div class="claw right"></div>
+
+                <div class="leg l1"></div>
+
+                <div class="leg l2"></div>
+
+                <div class="leg l3"></div>
+
+                <div class="leg l4"></div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    game.appendChild(div);
+
+    e.element=div;
+
+    updateEnemyElement(e);
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR ENEMIGO
+   ========================================================= */
+
+function updateEnemyElement(e){
+
+    if(!e.element)return;
+
+
+    e.element.style.left=
+        e.x+"px";
+
+    e.element.style.top=
+        e.y+"px";
+
+
+    e.element.style.transform=
+        "scaleX("+
+        (e.direction===1?1:-1)+
+        ")";
+
+}
+
+
+/* =========================================================
+   SIGUIENTE PLATAFORMA
+   ========================================================= */
+
+function chooseNextPlatform(e){
+
+    const current=
+        e.platformIndex;
+
+    let candidates=[];
+
+
+    for(
+        let i=0;
+        i<e.route.length;
+        i++
+    ){
+
+        const candidate=e.route[i];
+
+        if(candidate===current)continue;
+
+
+        const diff=
+            platforms[candidate].y-
+            platforms[current].y;
+
+
+        if(Math.abs(diff)<H*.42){
+
+            candidates.push(candidate);
+
         }
 
-        if(bossActive && boss){
+    }
 
-            const bx=boss.x+boss.w/2;
-            const by=boss.y+boss.h/2;
+
+    if(!candidates.length){
+
+        candidates=
+            [0,1,2,3]
+            .filter(x=>x!==current);
+
+    }
+
+
+    const used=
+        enemies
+        .filter(
+            other=>
+                other.alive &&
+                other!==e
+        )
+        .map(
+            other=>
+                other.targetPlatform
+        );
+
+
+    let free=
+        candidates.filter(
+            c=>!used.includes(c)
+        );
+
+
+    if(free.length){
+
+        candidates=free;
+
+    }
+
+
+    const target=
+        candidates[
+            Math.floor(
+                Math.random()*
+                candidates.length
+            )
+        ];
+
+
+    e.targetPlatform=target;
+
+}
+
+
+/* =========================================================
+   SALTO ENEMIGO
+   ========================================================= */
+
+function enemyJump(e){
+
+    if(!e.grounded)return;
+
+    if(e.jumpCooldown>0)return;
+
+    if(e.waitTimer>0)return;
+
+
+    chooseNextPlatform(e);
+
+
+    const target=
+        platforms[e.targetPlatform];
+
+    const current=
+        platforms[e.platformIndex];
+
+
+    const targetCenter=
+        target.x+
+        target.w/2;
+
+
+    const currentCenter=
+        current.x+
+        current.w/2;
+
+
+    const horizontalDistance=
+        Math.abs(
+            targetCenter-currentCenter
+        );
+
+
+    if(horizontalDistance>W*.65){
+
+        e.targetPlatform=0;
+
+    }
+
+
+    e.vy=
+        -e.jumpPower;
+
+    e.grounded=false;
+
+    e.platformIndex=-1;
+
+    e.jumpCooldown=90;
+
+
+    if(e.element){
+
+        e.element.classList.add(
+            "jumping"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FÍSICA ENEMIGO
+   ========================================================= */
+
+function updateEnemy(e,dt=1){
+
+    if(!e.alive)return;
+
+
+    if(e.jumpCooldown>0){
+
+        e.jumpCooldown-=dt;
+
+        if(e.jumpCooldown<0){
+
+            e.jumpCooldown=0;
+
+        }
+
+    }
+
+
+    if(e.waitTimer>0){
+
+        e.waitTimer-=dt;
+
+        if(e.waitTimer<0){
+
+            e.waitTimer=0;
+
+        }
+
+    }
+
+
+    /* ==========================================
+       ENEMIGO EN EL AIRE
+       ========================================== */
+
+    if(!e.grounded){
+
+        const target=
+            platforms[e.targetPlatform];
+
+
+        if(target){
+
+            const targetCenter=
+                target.x+
+                target.w/2;
+
+            const enemyCenter=
+                e.x+
+                e.w/2;
+
 
             if(
-                Math.abs(s.x-bx)<120 &&
-                Math.abs(s.y-by)<130
+                enemyCenter<
+                targetCenter-12
             ){
 
-                boss.hp-=1+s.power;
+                e.vx=e.speed;
 
-                for(let p=0;p<12;p++)
-                    addParticle(s.x,s.y,"boss");
+                e.direction=1;
 
-                destroyed=true;
-
-                if(boss.hp<=0){
-
-                    bossActive=false;
-                    boss=null;
-
-                    score+=5000;
-
-                    victory();
-                }
             }
+
+            else if(
+                enemyCenter>
+                targetCenter+12
+            ){
+
+                e.vx=-e.speed;
+
+                e.direction=-1;
+
+            }
+
+            else{
+
+                e.vx*=
+                    Math.pow(.85,dt);
+
+            }
+
         }
+
+
+        e.vy+=
+            e.gravity*dt;
+
+
+        if(e.vy>15){
+
+            e.vy=15;
+
+        }
+
+
+        e.x+=e.vx*dt;
+
+        e.y+=e.vy*dt;
+
+
+        /* ==================================
+           COLISIÓN CON PLATAFORMAS
+           ================================== */
+
+        for(
+            let i=0;
+            i<platforms.length;
+            i++
+        ){
+
+            const p=
+                platforms[i];
+
+
+            const horizontal=
+
+                e.x+
+                e.w-
+                7>p.x &&
+
+                e.x+
+                7<
+                p.x+p.w;
+
+
+            const landing=
+
+                e.y+
+                e.h>=p.y &&
+
+                e.y+
+                e.h<=p.y+24 &&
+
+                e.vy>=0;
+
+
+            if(horizontal && landing){
+
+                e.y=
+                    p.y-e.h;
+
+                e.vy=0;
+
+                e.grounded=true;
+
+                e.platformIndex=i;
+
+
+                if(i===1){
+
+                    e.waitTimer=170;
+
+                }
+
+                else if(i===2){
+
+                    e.waitTimer=210;
+
+                }
+
+                else if(i===3){
+
+                    e.waitTimer=140;
+
+                }
+
+                else{
+
+                    e.waitTimer=70;
+
+                }
+
+
+                if(e.element){
+
+                    e.element.classList.remove(
+                        "jumping"
+                    );
+
+                }
+
+                break;
+
+            }
+
+        }
+
+
+        /* ==================================
+           RECUPERACIÓN
+           ================================== */
+
+        if(e.y>H+100){
+
+            e.platformIndex=0;
+
+            e.y=
+                platforms[0].y-
+                e.h;
+
+            e.x=
+                Math.random()*
+                Math.max(
+                    1,
+                    W-e.w
+                );
+
+            e.vy=0;
+
+            e.grounded=true;
+
+            e.waitTimer=70;
+
+        }
+
+    }
+
+    else{
+
+        /* ==================================
+           ENEMIGO SOBRE BASE
+           ================================== */
+
+        const p=
+            platforms[e.platformIndex];
+
+
+        if(!p){
+
+            e.grounded=false;
+
+            return;
+
+        }
+
+
+        e.vx=
+            e.direction*
+            e.speed;
+
+
+        e.x+=
+            e.vx*dt;
+
+
+        const leftEdge=
+            e.x<=p.x;
+
+        const rightEdge=
+            e.x+e.w>=p.x+p.w;
+
 
         if(
-            s.life<=0||
-            s.x<cameraX-100||
-            s.x>cameraX+W+300
+            (leftEdge || rightEdge) &&
+            e.waitTimer<=0
         ){
-            destroyed=true;
-        }
 
-        if(destroyed)
-            shots.splice(i,1);
-    }
-}
+            const chance=
+                Math.random();
 
-/* =========================
-   BOSS UPDATE
-========================= */
 
-function updateBoss(dt){
+            if(chance<.78){
 
-    if(!boss) return;
+                enemyJump(e);
 
-    boss.phase+=dt*2;
-
-    const target=player.x-150;
-
-    if(boss.x<target)
-        boss.x+=1.1;
-
-    if(boss.x>target)
-        boss.x-=1.1;
-
-    boss.y=150+Math.sin(boss.phase)*70;
-
-    boss.attackTimer-=dt;
-
-    if(boss.attackTimer<=0){
-
-        boss.attackTimer=1.5;
-
-        const dx=player.x-boss.x;
-        const dy=player.y-boss.y;
-
-        const len=Math.sqrt(dx*dx+dy*dy)||1;
-
-        shots.push({
-            x:boss.x+boss.w/2,
-            y:boss.y+boss.h/2,
-            vx:dx/len*5,
-            vy:dy/len*5,
-            r:13,
-            power:-1,
-            life:5,
-            enemy:true
-        });
-    }
-
-    /* colisión tentáculo */
-
-    if(player.invincible<=0){
-
-        for(let i=0;i<6;i++){
-
-            const tx=boss.x+35+i*30;
-            const ty=boss.y+170+
-                Math.sin(boss.phase+i)*45;
-
-            const dx=player.x+player.w/2-tx;
-            const dy=player.y+player.h/2-ty;
-
-            if(Math.sqrt(dx*dx+dy*dy)<60){
-
-                loseLife();
-                break;
             }
+
+            else{
+
+                e.grounded=false;
+
+                e.platformIndex=-1;
+
+                e.vy=1;
+
+            }
+
         }
+
+
+        if(e.grounded){
+
+            if(e.x<p.x){
+
+                e.x=p.x;
+
+            }
+
+
+            if(e.x+e.w>p.x+p.w){
+
+                e.x=
+                    p.x+
+                    p.w-
+                    e.w;
+
+            }
+
+        }
+
+
+        /* Movimiento pequeño durante espera */
+
+        if(e.waitTimer>0){
+
+            e.vx*=.35;
+
+            e.x+=
+                Math.sin(
+                    (Date.now()+
+                    e.separationSeed*100)/
+                    500
+                )*.25;
+
+        }
+
+
+        /* Salto ocasional */
+
+        if(
+            e.waitTimer<=0 &&
+            Math.random()<.009*dt
+        ){
+
+            enemyJump(e);
+
+        }
+
     }
+
+
+    updateEnemyElement(e);
+
 }
 
-/* =========================
-   DISPAROS DEL BOSS
-========================= */
 
-function updateEnemyShots(dt){
+/* =========================================================
+   CREAR ENEMIGOS
+   ========================================================= */
 
-    for(let i=shots.length-1;i>=0;i--){
+function createStageEnemies(){
+
+    enemies.forEach(e=>{
+
+        if(e.element){
+
+            e.element.remove();
+
+        }
+
+    });
+
+
+    enemies=[];
+
+
+    createEnemy(
+        "octopus",
+        1,
+        W*.10
+    );
+
+
+    createEnemy(
+        "crab",
+        2,
+        W*.48
+    );
+
+
+    createEnemy(
+        "octopus",
+        3,
+        W*.72
+    );
+
+
+    createEnemy(
+        "crab",
+        0,
+        W*.55
+    );
+
+}
+
+
+/* =========================================================
+   DISPAROS
+   ========================================================= */
+
+let shots=[];
+
+let lastShotTime=0;
+
+
+/* DISPARO MÁS RÁPIDO */
+
+const SHOOT_DELAY=145;
+
+
+function shoot(){
+
+    const now=
+        performance.now();
+
+
+    if(
+        now-lastShotTime<
+        SHOOT_DELAY
+    ){
+
+        return;
+
+    }
+
+
+    lastShotTime=now;
+
+
+    const shot=
+        document.createElement("div");
+
+
+    shot.className=
+        "waterShot";
+
+
+    const direction=
+        player.direction;
+
+
+    let sx;
+
+
+    if(direction===1){
+
+        sx=
+            player.x+
+            player.w-2;
+
+    }
+
+    else{
+
+        sx=
+            player.x-14;
+
+    }
+
+
+    const sy=
+        player.y+25;
+
+
+    shot.style.left=
+        sx+"px";
+
+    shot.style.top=
+        sy+"px";
+
+
+    game.appendChild(shot);
+
+
+    shots.push({
+
+        x:sx,
+
+        y:sy,
+
+        w:17,
+
+        h:9,
+
+        /* DISPARO MÁS RÁPIDO */
+
+        vx:direction*15,
+
+        element:shot
+
+    });
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR DISPAROS
+   ========================================================= */
+
+function updateShots(dt=1){
+
+    for(
+        let i=shots.length-1;
+        i>=0;
+        i--
+    ){
 
         const s=shots[i];
 
-        if(!s.enemy) continue;
 
-        s.x+=s.vx;
-        s.y+=s.vy;
-        s.life-=dt;
+        s.x+=
+            s.vx*dt;
+
+
+        s.element.style.left=
+            s.x+"px";
+
+
+        s.element.style.top=
+            s.y+"px";
+
+
+        let hit=false;
+
+
+        for(
+            let j=enemies.length-1;
+            j>=0;
+            j--
+        ){
+
+            const e=
+                enemies[j];
+
+
+            if(!e.alive)continue;
+
+
+            if(
+                rectOverlap(
+                    s.x,
+                    s.y,
+                    s.w,
+                    s.h,
+                    e.x+8,
+                    e.y+7,
+                    e.w-16,
+                    e.h-10
+                )
+            ){
+
+                hit=true;
+
+                e.hp--;
+
+
+                createWaterHit(
+                    s.x,
+                    s.y
+                );
+
+
+                if(e.hp<=0){
+
+                    defeatEnemy(e);
+
+                }
+
+
+                break;
+
+            }
+
+        }
+
 
         if(
-            player.invincible<=0 &&
-            Math.abs(s.x-(player.x+20))<30 &&
-            Math.abs(s.y-(player.y+30))<35
+            hit ||
+            s.x<-50 ||
+            s.x>W+50
+        ){
+
+            s.element.remove();
+
+            shots.splice(i,1);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   EFECTO AGUA
+   ========================================================= */
+
+function createWaterHit(x,y){
+
+    const fx=
+        document.createElement("div");
+
+
+    fx.style.position="absolute";
+
+    fx.style.left=x+"px";
+
+    fx.style.top=y+"px";
+
+    fx.style.width="18px";
+
+    fx.style.height="18px";
+
+    fx.style.borderRadius="50%";
+
+    fx.style.background="#bfffff";
+
+    fx.style.boxShadow=
+        "0 0 15px #00eaff";
+
+    fx.style.zIndex="70";
+
+
+    game.appendChild(fx);
+
+
+    setTimeout(()=>{
+
+        fx.remove();
+
+    },160);
+
+}
+
+
+/* =========================================================
+   DERROTAR ENEMIGO
+   ========================================================= */
+
+function defeatEnemy(e){
+
+    e.alive=false;
+
+
+    if(e.element){
+
+        e.element.remove();
+
+    }
+
+
+    const drop=
+        document.createElement("div");
+
+
+    drop.className="drop";
+
+
+    drop.style.left=
+        (
+            e.x+
+            e.w/2-
+            11
+        )+"px";
+
+
+    drop.style.top=
+        (
+            e.y+
+            e.h/2-
+            14
+        )+"px";
+
+
+    game.appendChild(drop);
+
+
+    e.drop=drop;
+
+    e.dropCollected=false;
+
+
+    score+=100;
+
+    updateScore();
+
+}
+
+
+/* =========================================================
+   GOTAS
+   ========================================================= */
+
+function updateDrops(){
+
+    enemies.forEach(e=>{
+
+        if(
+            !e.drop ||
+            e.dropCollected
+        ){
+
+            return;
+
+        }
+
+
+        const dx=
+            e.x+
+            e.w/2;
+
+        const dy=
+            e.y+
+            e.h/2;
+
+
+        const dropX=
+            parseFloat(
+                e.drop.style.left
+            )+11;
+
+
+        const dropY=
+            parseFloat(
+                e.drop.style.top
+            )+14;
+
+
+        const distance=
+            Math.hypot(
+                player.x+
+                player.w/2-dx,
+
+                player.y+
+                player.h/2-dy
+            );
+
+
+        const playerDistance=
+            Math.hypot(
+
+                player.x+
+                player.w/2-
+                dropX,
+
+                player.y+
+                player.h/2-
+                dropY
+
+            );
+
+
+        if(playerDistance<45){
+
+            e.dropCollected=true;
+
+            e.drop.remove();
+
+            e.drop=null;
+
+            score+=250;
+
+            updateScore();
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   COLISIONES
+   ========================================================= */
+
+function rectOverlap(
+    ax,ay,aw,ah,
+    bx,by,bw,bh
+){
+
+    return(
+
+        ax<bx+bw &&
+
+        ax+aw>bx &&
+
+        ay<by+bh &&
+
+        ay+ah>by
+
+    );
+
+}
+
+
+/* =========================================================
+   HITBOX JUGADOR
+   ========================================================= */
+
+function playerHitBox(){
+
+    return{
+
+        left:
+            player.x+12,
+
+        right:
+            player.x+
+            player.w-
+            12,
+
+        top:
+            player.y+16,
+
+        bottom:
+            player.y+
+            player.h-
+            5
+
+    };
+
+}
+
+
+/* =========================================================
+   HITBOX ENEMIGO
+   ========================================================= */
+
+function enemyHitBox(e){
+
+    return{
+
+        left:
+            e.x+10,
+
+        right:
+            e.x+
+            e.w-
+            10,
+
+        top:
+            e.y+8,
+
+        bottom:
+            e.y+
+            e.h-
+            6
+
+    };
+
+}
+
+
+/* =========================================================
+   COLISIÓN ENEMIGO
+   ========================================================= */
+
+function checkEnemyCollisions(){
+
+    const p=
+        playerHitBox();
+
+
+    for(const e of enemies){
+
+        if(!e.alive)continue;
+
+
+        const h=
+            enemyHitBox(e);
+
+
+        if(
+            player.grounded &&
+            e.grounded &&
+            player.currentPlatform!==e.platformIndex
+        ){
+
+            continue;
+
+        }
+
+
+        if(
+
+            p.left<h.right &&
+
+            p.right>h.left &&
+
+            p.top<h.bottom &&
+
+            p.bottom>h.top
+
         ){
 
             loseLife();
-            shots.splice(i,1);
-            continue;
+
+            break;
+
         }
 
-        if(s.life<=0)
-            shots.splice(i,1);
     }
+
 }
 
-/* =========================
+
+/* =========================================================
    VIDAS
-========================= */
+   ========================================================= */
+
+let lives=3;
+
+let damageCooldown=0;
+
 
 function loseLife(){
 
-    if(player.invincible>0)
-        return;
+    if(player.invulnerable>0)return;
+
 
     lives--;
 
-    updateHUD();
+    updateLives();
 
-    player.invincible=2;
 
-    for(let i=0;i<20;i++)
-        addParticle(player.x+20,player.y+30);
+    player.invulnerable=120;
+
+
+    playerEl.style.opacity=".35";
+
+
+    setTimeout(()=>{
+
+        playerEl.style.opacity="1";
+
+    },700);
+
 
     if(lives<=0){
 
-        gameOver=true;
-
-        showMessage(
-            "GAME OVER",
-            "Puntuación: "+score,
-            "VOLVER A JUGAR"
-        );
+        endGame();
 
         return;
+
     }
 
-    player.x=Math.max(80,player.x-120);
-    player.y=250;
-    player.vy=0;
-}
 
-/* =========================
-   PORTAL
-========================= */
-
-function drawPortal(){
-
-    if(!portal) return;
-
-    const x=portal.x-cameraX;
-
-    ctx.strokeStyle="#ffffff";
-    ctx.lineWidth=6;
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        x+portal.w/2,
-        portal.y+45,
-        25,
-        45,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.stroke();
-
-    ctx.fillStyle="#b56cff";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        x+portal.w/2,
-        portal.y+45,
-        16,
-        35,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-}
-
-/* =========================
-   CAMBIO DE NIVEL
-========================= */
-
-function checkLevel(){
-
-    if(level<4 && enemies.length===0){
-
-        if(!portal)
-            portal={
-                x:player.x+350,
-                y:H-235,
-                w:55,
-                h:90
-            };
+    setTimeout(()=>{
 
         if(
-            player.x+player.w>portal.x &&
-            player.x<portal.x+portal.w &&
-            player.y+player.h>portal.y
+            gameOverEl.style.display===
+            "flex"
         ){
 
-            level++;
+            return;
 
-            levelComplete=true;
-
-            showMessage(
-                "NIVEL COMPLETADO",
-                levels[level],
-                "CONTINUAR"
-            );
         }
-    }
 
-    if(level===4 &&
-       enemies.length===0 &&
-       !bossActive &&
-       !boss &&
-       !levelComplete){
 
-        createBoss();
-    }
+        placePlayer();
+
+    },400);
+
 }
 
-/* =========================
-   VICTORIA
-========================= */
 
-function victory(){
+function updateLives(){
 
-    showMessage(
-        "¡VICTORIA!",
-        "ECRA derrotó al Rey de las Profundidades",
-        "JUGAR DE NUEVO"
-    );
+    if(lives===3){
 
-    gameOver=true;
-}
+        livesEl.textContent=
+            "♥ ♥ ♥";
 
-/* =========================
-   PARTÍCULAS
-========================= */
-
-function updateParticles(dt){
-
-    for(let i=particles.length-1;i>=0;i--){
-
-        const p=particles[i];
-
-        p.x+=p.vx;
-        p.y+=p.vy;
-        p.vy+=.08;
-        p.life-=dt;
-
-        if(p.life<=0)
-            particles.splice(i,1);
-    }
-}
-
-function drawParticles(){
-
-    for(const p of particles){
-
-        ctx.globalAlpha=Math.max(0,p.life);
-
-        ctx.fillStyle=
-            p.type==="boss"?"#ff55dd":"#aaffff";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            p.x-cameraX,
-            p.y,
-            3+Math.random()*3,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
     }
 
-    ctx.globalAlpha=1;
-}
+    else if(lives===2){
 
-/* =========================
-   HUD
-========================= */
+        livesEl.textContent=
+            "♥ ♥";
 
-function updateHUD(){
-
-    document.getElementById("lives").textContent=
-        "❤️".repeat(Math.max(0,lives));
-
-    document.getElementById("score").textContent=
-        String(score).padStart(6,"0");
-
-    document.getElementById("levelText").textContent=
-        levels[level];
-}
-
-/* =========================
-   MENSAJES
-========================= */
-
-function showMessage(title,text,button){
-
-    const m=document.getElementById("message");
-
-    m.classList.remove("hidden");
-
-    m.querySelector("h1").textContent=title;
-    m.querySelectorAll("p")[0].textContent=text;
-    m.querySelectorAll("p")[1].textContent="";
-    document.getElementById("start").textContent=button;
-}
-
-document.getElementById("start").addEventListener("click",()=>{
-
-    document.getElementById("message").classList.add("hidden");
-
-    if(gameOver){
-
-        level=0;
-        score=0;
-        lives=7;
-        gameOver=false;
-        levelComplete=false;
-
-        createLevel();
-        updateHUD();
-
-        return;
     }
 
-    if(levelComplete){
+    else if(lives===1){
 
-        levelComplete=false;
+        livesEl.textContent=
+            "♥";
 
-        createLevel();
-        updateHUD();
-
-        return;
     }
 
-    gameStarted=true;
-    createLevel();
-    updateHUD();
-});
+    else{
 
-/* =========================
-   DIBUJO
-========================= */
+        livesEl.textContent=
+            "0";
 
-function draw(){
+    }
 
-    drawBackground();
-    drawPlatforms();
+}
 
-    if(portal)
-        drawPortal();
 
-    for(const e of enemies)
-        drawEnemy(e);
+/* =========================================================
+   MEDUSA
+   ========================================================= */
 
-    for(const b of bubbles)
-        drawBubble(b);
+let jellyTimer=0;
 
-    for(const s of shots)
-        drawShot(s);
+let jellyVisible=false;
 
-    if(bossActive)
-        drawBoss();
 
-    drawParticles();
+function updateJellyfish(){
+
+    jellyTimer++;
+
 
     if(
-        player.invincible<=0 ||
-        Math.floor(performance.now()/100)%2===0
+        !jellyVisible &&
+        jellyTimer>500
     ){
-        drawPlayer();
+
+        jellyVisible=true;
+
+        jellyTimer=0;
+
+
+        jellyfishEl.style.display=
+            "block";
+
+
+        jellyfishEl.style.left=
+            (
+                Math.random()*
+                (W-50)
+            )+"px";
+
+
+        jellyfishEl.style.top=
+            (
+                H*.25+
+                Math.random()*H*.35
+            )+"px";
+
     }
+
+
+    if(jellyVisible){
+
+        const x=
+            parseFloat(
+                jellyfishEl.style.left
+            );
+
+
+        jellyfishEl.style.left=
+            (
+                x+
+                Math.sin(
+                    Date.now()/500
+                )*.5
+            )+"px";
+
+
+        if(jellyTimer>260){
+
+            jellyVisible=false;
+
+            jellyTimer=0;
+
+            jellyfishEl.style.display=
+                "none";
+
+        }
+
+
+        if(
+
+            rectOverlap(
+
+                player.x+12,
+
+                player.y+15,
+
+                player.w-24,
+
+                player.h-20,
+
+                parseFloat(
+                    jellyfishEl.style.left
+                ),
+
+                parseFloat(
+                    jellyfishEl.style.top
+                ),
+
+                40,
+
+                40
+
+            )
+
+        ){
+
+            loseLife();
+
+        }
+
+    }
+
 }
 
-/* =========================
-   GAME LOOP
-========================= */
 
-let last=performance.now();
+/* =========================================================
+   PUNTUACIÓN
+   ========================================================= */
 
-function loop(now){
+let score=0;
 
-    const dt=Math.min(
-        (now-last)/1000,
-        .033
+
+function updateScore(){
+
+    scoreEl.textContent=
+        String(score)
+        .padStart(6,"0");
+
+}
+
+
+/* =========================================================
+   STAGES
+   ========================================================= */
+
+let stage=1;
+
+let gameRunning=true;
+
+let transitioning=false;
+
+let victory=false;
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+function showMessage(text,time){
+
+    messageEl.textContent=text;
+
+    messageEl.classList.add("show");
+
+
+    setTimeout(()=>{
+
+        messageEl.classList.remove(
+            "show"
+        );
+
+    },time);
+
+}
+
+
+/* =========================================================
+   STAGE COMPLETO
+   ========================================================= */
+
+function checkStageComplete(){
+
+    if(transitioning)return;
+
+
+    const remaining=
+        enemies.some(
+            e=>e.alive
+        );
+
+
+    if(!remaining){
+
+        const drops=
+            enemies.some(
+                e=>
+                    e.drop &&
+                    !e.dropCollected
+            );
+
+
+        if(!drops){
+
+            startStageTransition();
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   TRANSICIÓN
+   ========================================================= */
+
+function startStageTransition(){
+
+    transitioning=true;
+
+    gameRunning=false;
+
+
+    showMessage(
+        "STAGE CLEAR!",
+        1000
     );
 
-    last=now;
 
-    if(gameStarted &&
-       !gameOver &&
-       !levelComplete){
+    let start=
+        performance.now();
 
-        updatePlayer(dt);
-        updateEnemies(dt);
-        updateShots(dt);
-        updateEnemyShots(dt);
-        updateParticles(dt);
-        updateBoss(dt);
 
-        checkLevel();
+    function fly(){
 
-        updateHUD();
+        const elapsed=
+            performance.now()-
+            start;
+
+
+        player.y-=7;
+
+
+        playerEl.style.top=
+            player.y+"px";
+
+
+        if(elapsed<850){
+
+            requestAnimationFrame(
+                fly
+            );
+
+        }
+
+        else{
+
+            changeStage();
+
+        }
+
     }
 
-    draw();
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(
+        fly
+    );
+
 }
 
-createLevel();
-updateHUD();
-requestAnimationFrame(loop);
+
+/* =========================================================
+   CAMBIAR STAGE
+   ========================================================= */
+
+function changeStage(){
+
+    stage++;
+
+
+    if(stage>5){
+
+        victory=true;
+
+        gameRunning=false;
+
+
+        messageEl.textContent=
+            "¡ECRA GANÓ!";
+
+
+        messageEl.classList.add(
+            "show"
+        );
+
+
+        return;
+
+    }
+
+
+    stageEl.textContent=
+        stage;
+
+
+    setBackground(stage);
+
+    buildPlatforms();
+
+    createStageEnemies();
+
+
+    player.x=
+        W*.5-
+        player.w/2;
+
+
+    player.y=
+        -player.h-
+        20;
+
+
+    player.vx=0;
+
+    player.vy=3;
+
+    player.grounded=false;
+
+    player.currentPlatform=-1;
+
+
+    showMessage(
+        "STAGE "+stage,
+        1000
+    );
+
+
+    transitioning=false;
+
+    gameRunning=true;
+
+}
+
+
+/* =========================================================
+   GAME OVER
+   ========================================================= */
+
+function endGame(){
+
+    gameRunning=false;
+
+    finalScoreEl.textContent=
+        score;
+
+    gameOverEl.style.display=
+        "flex";
+
+}
+
+
+/* =========================================================
+   REINICIAR
+   ========================================================= */
+
+document
+    .getElementById("restart")
+    .addEventListener(
+        "click",
+        function(){
+
+            lives=3;
+
+            score=0;
+
+            stage=1;
+
+
+            updateLives();
+
+            updateScore();
+
+
+            gameOverEl.style.display=
+                "none";
+
+
+            victory=false;
+
+            transitioning=false;
+
+
+            setBackground(stage);
+
+            buildPlatforms();
+
+            createStageEnemies();
+
+            placePlayer();
+
+
+            gameRunning=true;
+
+            lastFrameTime=
+                performance.now();
+
+        }
+    );
+
+
+/* =========================================================
+   LOOP PRINCIPAL
+   ========================================================= */
+
+function gameLoop(){
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+
+    const dt=
+        getFrameScale();
+
+
+    if(!gameRunning)return;
+
+
+    if(
+        shootPressed ||
+        keys.shoot
+    ){
+
+        shoot();
+
+        shootPressed=false;
+
+    }
+
+
+    updatePlayer(dt);
+
+    updateShots(dt);
+
+
+    enemies.forEach(
+        e=>
+            updateEnemy(e,dt)
+    );
+
+
+    updateDrops();
+
+    checkEnemyCollisions();
+
+    updateJellyfish();
+
+    checkStageComplete();
+
+}
+
+
+/* =========================================================
+   RESIZE
+   ========================================================= */
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        resizeGame();
+
+    }
+);
+
+
+/* =========================================================
+   RESPALDO SPRITE
+   ========================================================= */
+
+playerImg.onerror=function(){
+
+    if(
+        playerImg.src.indexOf(
+            "ecra_walk1.png"
+        )===-1
+    ){
+
+        playerImg.src=
+            "ecra_walk1.png";
+
+    }
+
+};
+
+
+/* =========================================================
+   INICIO
+   ========================================================= */
+
+setBackground(1);
+
+findIdleSprite();
+
+
+setTimeout(()=>{
+
+    resizeGame();
+
+    buildPlatforms();
+
+    createStageEnemies();
+
+    placePlayer();
+
+    updateLives();
+
+    updateScore();
+
+    lastFrameTime=
+        performance.now();
+
+    gameLoop();
+
+},100);
+
+
+/* =========================================================
+   FIN ECRA V5.5
+   ========================================================= */
 
 </script>
 
 </body>
 </html>
-
